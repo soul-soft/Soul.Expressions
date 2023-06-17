@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Soul.Expressions
@@ -16,6 +17,11 @@ namespace Soul.Expressions
 		public static void RegisterMethod(string name, Delegate method)
 		{
 			Methods.Add(name, method.Method);
+		}
+
+		public static LambdaExpression MakeLambda(SyntaxTree tree)
+		{
+			
 		}
 	}
 }

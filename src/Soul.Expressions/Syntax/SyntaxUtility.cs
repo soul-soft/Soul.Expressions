@@ -1,33 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Soul.Expressions
 {
-	public static class SyntaxUtility
+	internal static class SyntaxUtility
 	{
+		#region Token
 		/// <summary>
 		/// 是否为常量
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool IsConstant(string expr)
+		public static bool IsConstantToken(string expr)
 		{
-			if (IsBool(expr))
+			if (IsBoolToken(expr))
 			{
 				return true;
 			}
-			if (IsNumber(expr))
+			if (IsNumberToken(expr))
 			{
 				return true;
 			}
-			if (IsString(expr))
+			if (IsStringToken(expr))
 			{
 				return true;
 			}
-			if (IsChar(expr))
+			if (IsCharToken(expr))
 			{
 				return true;
 			}
@@ -38,7 +37,7 @@ namespace Soul.Expressions
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool IsString(string expr)
+		public static bool IsStringToken(string expr)
 		{
 			if (expr.Length < 2)
 			{
@@ -60,7 +59,7 @@ namespace Soul.Expressions
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool IsChar(string expr)
+		public static bool IsCharToken(string expr)
 		{
 			if (expr.Length < 3)
 			{
@@ -86,7 +85,7 @@ namespace Soul.Expressions
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool IsNumber(string expr)
+		public static bool IsNumberToken(string expr)
 		{
 			return Regex.IsMatch(expr, @"^\d+(\.\d)*$");
 		}
@@ -95,7 +94,7 @@ namespace Soul.Expressions
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool IsIntger(string expr)
+		public static bool IsIntgerToken(string expr)
 		{
 			return Regex.IsMatch(expr, @"^\d+$");
 		}
@@ -104,7 +103,7 @@ namespace Soul.Expressions
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool IsDouble(string expr)
+		public static bool IsDoubleToken(string expr)
 		{
 			return Regex.IsMatch(expr, @"^\d+\.\d+$");
 		}
@@ -113,7 +112,7 @@ namespace Soul.Expressions
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool IsBool(string expr)
+		public static bool IsBoolToken(string expr)
 		{
 			if (expr == "true")
 			{
@@ -130,7 +129,7 @@ namespace Soul.Expressions
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static string[] SplitParameters(string expr)
+		public static string[] MatchParameterTokens(string expr)
 		{
 			var args = new List<string>();
 			var index = 0;
@@ -166,5 +165,6 @@ namespace Soul.Expressions
 			}
 			return args.Select(s => s.Trim()).ToArray();
 		}
+		#endregion
 	}
 }

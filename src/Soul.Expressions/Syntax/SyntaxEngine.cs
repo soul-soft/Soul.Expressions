@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Soul.Expressions.Tokens;
@@ -9,18 +8,19 @@ namespace Soul.Expressions
 	/// <summary>
 	/// 语法分析引擎 
 	/// </summary>
-	public class SyntaxEngine
+	public static class SyntaxEngine
 	{
 		/// <summary>
 		/// 运行
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static SyntaxTree Run(string expr, SyntaxContext context)
+		public static SyntaxTree Run(string expr, SyntaxOptions options)
 		{
-			var tree = new SyntaxTree(expr, context);
+			var tree = new SyntaxTree(expr, options);
 			return Watch(tree);
 		}
+		
 		/// <summary>
 		/// 观察
 		/// </summary>
@@ -45,12 +45,12 @@ namespace Soul.Expressions
 				//处理换元
 				return expr;
 			}
-			if (tree.Context.ContainsParameter(expr))
+			if (tree.ContainsParameter(expr))
 			{
 				//处理参数
 				return expr;
 			}
-			if (SyntaxUtility.IsConstant(expr))
+			if (SyntaxUtility.IsConstantToken(expr))
 			{
 				//处理常量
 				return expr;
@@ -62,9 +62,9 @@ namespace Soul.Expressions
 				var name = objectMethodMatch.Groups["name"].Value;
 				var args = objectMethodMatch.Groups["args"].Value;
 				var value = objectMethodMatch.Value;
-				var parameters = SyntaxUtility.SplitParameters(args);
-				var parametersList = parameters.Select(arg => Watch(arg, tree)).ToArray();
-				var token = new MethodSyntaxToken(value, type, name, parametersList, expr);
+				var parameters = SyntaxUtility.MatchParameterTokens(args)
+					.Select(arg => Watch(arg, tree)).ToArray(); 
+				var token = new MethodSyntaxToken(value, type, name, parameters, expr);
 				var funcKey = tree.AddToken(token);
 				return funcKey;
 			}
@@ -74,7 +74,7 @@ namespace Soul.Expressions
 				var name = globalMethodMatch.Groups["name"].Value;
 				var args = globalMethodMatch.Groups["args"].Value;
 				var value = globalMethodMatch.Value;
-				var parameters = SyntaxUtility.SplitParameters(args);
+				var parameters = SyntaxUtility.MatchParameterTokens(args);
 				var parametersArray = parameters.Select(arg => Watch(arg, tree)).ToArray();
 				var token = new MethodSyntaxToken(value, null, name, parametersArray, expr);
 				var funcKey = tree.AddToken(token);
@@ -223,6 +223,7 @@ namespace Soul.Expressions
 			match = Regex.Match(expr, @"(?<name>\w+)\((?<args>[^\(|\)]+)\)");
 			return match.Success;
 		}
+		
 		/// <summary>
 		/// 匹配成员函数
 		/// </summary>

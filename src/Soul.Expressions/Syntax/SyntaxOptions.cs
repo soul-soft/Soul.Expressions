@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Soul.Expressions
 {
-	public class SyntaxContext
+	public class SyntaxOptions
 	{
 		private HashSet<SyntaxParameter> _parameters = new HashSet<SyntaxParameter>();
 
@@ -24,7 +24,7 @@ namespace Soul.Expressions
 			_parameters.Add(new SyntaxParameter(name, value, type));
 		}
 
-		public bool ContainsParameter(string name)
+		internal bool ContainsParameter(string name)
 		{
 			return _parameters.Any(a => a.Name == name);
 		}

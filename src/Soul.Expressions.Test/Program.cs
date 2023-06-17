@@ -6,16 +6,15 @@ namespace Soul.Expressions.Test
 	{
 		static void Main(string[] args)
 		{
-			SyntaxEngineSettings.RegisterMethod("pow", new Func<int, bool>((age) => age > 0));
-			var context = new SyntaxContext();
-			context.AddParameter("age", 20);
-			var tree0 = SyntaxEngine.Run("pow(2,age)", context);
+			var options = new SyntaxOptions();
+			options.AddParameter("age", 20);
+			var tree0 = SyntaxEngine.Run("pow(2,age)", options);
 			Console.WriteLine(tree0.Raw);
 		}
 
 		public void Test()
 		{
-			var context = new SyntaxContext();
+			var context = new SyntaxOptions();
 			var tree0 = SyntaxEngine.Run("!flag && 1 > 2", context);
 			Console.WriteLine(tree0.Raw);
 			var tree1 = SyntaxEngine.Run("(1 + 2) * 4 / 5", context);

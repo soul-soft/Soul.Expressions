@@ -8,19 +8,24 @@ namespace Soul.Expressions
 	{
 		public string Text { get; }
 
-		public SyntaxContext Context { get; }
+		public SyntaxOptions Options { get; }
 
 		public Dictionary<string, SyntaxToken> _tokens = new Dictionary<string, SyntaxToken>();
 
-		internal SyntaxTree(string text, SyntaxContext context)
+		internal SyntaxTree(string text, SyntaxOptions context)
 		{
 			Text = text;
-			Context = context;
+			Options = context;
 		}
 
 		public bool ContainsKey(string key)
 		{
 			return _tokens.ContainsKey(key);
+		}
+
+		public bool ContainsParameter(string name)
+		{
+			return Options.ContainsParameter(name);
 		}
 
 		public string Raw
