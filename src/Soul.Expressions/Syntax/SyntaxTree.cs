@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using Soul.Expressions.Tokens;
 
 namespace Soul.Expressions
@@ -8,14 +9,14 @@ namespace Soul.Expressions
 	{
 		public string Text { get; }
 
-		public SyntaxOptions Options { get; }
+		private HashSet<SyntaxParameter> _parameters = new HashSet<SyntaxParameter>();
 
-		public Dictionary<string, SyntaxToken> _tokens = new Dictionary<string, SyntaxToken>();
+		private Dictionary<string, SyntaxToken> _tokens = new Dictionary<string, SyntaxToken>();
 
-		internal SyntaxTree(string text, SyntaxOptions context)
+		internal SyntaxTree(string text, SyntaxParameter[] parameters)
 		{
 			Text = text;
-			Options = context;
+			_parameters = new HashSet<SyntaxParameter>(parameters);
 		}
 
 		public bool ContainsKey(string key)
@@ -25,7 +26,7 @@ namespace Soul.Expressions
 
 		public bool ContainsParameter(string name)
 		{
-			return Options.ContainsParameter(name);
+			return _parameters.Any(a => a.Name == name);
 		}
 
 		public string Raw

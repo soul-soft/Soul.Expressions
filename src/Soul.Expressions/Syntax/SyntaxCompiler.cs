@@ -21,7 +21,7 @@ namespace Soul.Expressions
 
 		public static LambdaExpression MakeLambda(SyntaxTree tree)
 		{
-			
+			return null;
 		}
 	}
 }

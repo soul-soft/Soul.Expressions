@@ -15,12 +15,12 @@ namespace Soul.Expressions
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static SyntaxTree Run(string expr, SyntaxOptions options)
+		public static SyntaxTree Run(string expr, params SyntaxParameter[] parameters)
 		{
-			var tree = new SyntaxTree(expr, options);
+			var tree = new SyntaxTree(expr, parameters);
 			return Watch(tree);
 		}
-		
+
 		/// <summary>
 		/// 观察
 		/// </summary>
@@ -63,12 +63,12 @@ namespace Soul.Expressions
 				var args = objectMethodMatch.Groups["args"].Value;
 				var value = objectMethodMatch.Value;
 				var parameters = SyntaxUtility.MatchParameterTokens(args)
-					.Select(arg => Watch(arg, tree)).ToArray(); 
+					.Select(arg => Watch(arg, tree)).ToArray();
 				var token = new MethodSyntaxToken(value, type, name, parameters, expr);
 				var funcKey = tree.AddToken(token);
 				return funcKey;
 			}
-			if (MatchGlobalMethodSyntax(expr, out Match globalMethodMatch))
+			if (MatchStaticMethodSyntax(expr, out Match globalMethodMatch))
 			{
 				//处理函数
 				var name = globalMethodMatch.Groups["name"].Value;
@@ -94,7 +94,7 @@ namespace Soul.Expressions
 				//处理逻辑非
 				var expr1 = unaryMatch.Groups["expr1"].Value;
 				var value = unaryMatch.Value;
-				var key = tree.AddToken(new UnarySyntaxToken(value, expr1, "!"));
+				var key = tree.AddToken(new UnarySyntaxToken(value, Watch(expr1, tree), "!"));
 				var text = expr.Replace(value, key);
 				return Watch(text, tree);
 			}
@@ -194,7 +194,7 @@ namespace Soul.Expressions
 		/// <returns></returns>
 		private static bool MatchUnarySyntax(string expr, out Match match)
 		{
-			match = Regex.Match(expr, @"\!(?<expr1>\w+|#\{\d+\})");
+			match = Regex.Match(expr, @"\!(?<expr1>\w+|\w+\.\w+|#\{\d+\})");
 			return match.Success;
 		}
 
@@ -207,7 +207,7 @@ namespace Soul.Expressions
 		/// <returns></returns>
 		private static bool MatchBinarySyntax(string expr, out Match math, string args)
 		{
-			var pattern = $@"(?<expr1>(\w+\.*\w+|#\{{\d+\}}))\s*(?<expr2>({args}))\s*(?<expr3>(\w+\.*\w+|#\{{\d+\}})+)";
+			var pattern = $@"(?<expr1>(\w+|\w+\.\w+|#\{{\d+\}}))\s*(?<expr2>({args}))\s*(?<expr3>(\w+|\w+\.\w+|#\{{\d+\}}))";
 			math = Regex.Match(expr, pattern);
 			return math.Success;
 		}
@@ -218,12 +218,12 @@ namespace Soul.Expressions
 		/// <param name="expr"></param>
 		/// <param name="match"></param>
 		/// <returns></returns>
-		private static bool MatchGlobalMethodSyntax(string expr, out Match match)
+		private static bool MatchStaticMethodSyntax(string expr, out Match match)
 		{
 			match = Regex.Match(expr, @"(?<name>\w+)\((?<args>[^\(|\)]+)\)");
 			return match.Success;
 		}
-		
+
 		/// <summary>
 		/// 匹配成员函数
 		/// </summary>
