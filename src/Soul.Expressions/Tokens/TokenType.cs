@@ -1,6 +1,6 @@
 ﻿namespace Soul.Expressions.Tokens
 {
-	public enum SyntaxTokenType
+	public enum TokenType
 	{
 		Binary,
 		MethodCall,

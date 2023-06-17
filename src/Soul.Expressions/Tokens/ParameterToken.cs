@@ -2,14 +2,14 @@
 
 namespace Soul.Expressions.Tokens
 {
-	public class ParameterSyntaxToken : SyntaxToken
+	public class ParameterToken : SyntaxToken
 	{
 		public string Name { get; }
 		public object Value { get; }
 		public Type Type { get; }
-		public override SyntaxTokenType TokenType => SyntaxTokenType.Parameter;
+		public override TokenType TokenType => TokenType.Parameter;
 
-		public ParameterSyntaxToken(string name, object value, Type type)
+		public ParameterToken(string name, object value, Type type)
 		{
 			Debug = name;
 			Name = name;

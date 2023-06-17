@@ -39,6 +39,11 @@ namespace Soul.Expressions
 
 		private static Expression Watch(SyntaxToken token, SyntaxCompilerContext context)
 		{
+			if (token is ParameterToken parameterSyntaxToken)
+			{ 
+
+			}
+
 			return null;
 		}
 

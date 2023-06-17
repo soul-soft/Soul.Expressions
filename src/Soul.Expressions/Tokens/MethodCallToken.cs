@@ -1,14 +1,14 @@
 ﻿namespace Soul.Expressions.Tokens
 {
-	public class MethodCallSyntaxToken : SyntaxToken
+	public class MethodCallToken : SyntaxToken
 	{
 		public string Type { get; }
 		public string Name { get; }
 		public string[] Args { get; }
 
-		public override SyntaxTokenType TokenType => SyntaxTokenType.MethodCall;
+		public override TokenType TokenType => TokenType.MethodCall;
 
-		public MethodCallSyntaxToken(string type, string name, string[] args)
+		public MethodCallToken(string type, string name, string[] args)
 		{
 			Type = type;
 			Name = name;

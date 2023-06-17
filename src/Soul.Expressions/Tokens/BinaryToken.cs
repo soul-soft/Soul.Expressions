@@ -1,13 +1,13 @@
 ﻿namespace Soul.Expressions.Tokens
 {
-	public class BinarySyntaxToken : SyntaxToken
+	public class BinaryToken : SyntaxToken
 	{
 		public string Left { get; }
 		public string Operator { get; }
 		public string Right { get; }
-		public override SyntaxTokenType TokenType => SyntaxTokenType.Binary;
+		public override TokenType TokenType => TokenType.Binary;
 
-		public BinarySyntaxToken(string left, string @operator, string right)
+		public BinaryToken(string left, string @operator, string right)
 		{
 			Debug = $"{left} {@operator} {right}";
 			Left = left;

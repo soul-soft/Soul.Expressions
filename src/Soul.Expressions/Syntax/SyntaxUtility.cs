@@ -13,31 +13,31 @@ namespace Soul.Expressions
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool TryConstantSyntaxToken(string expr, out ConstantSyntaxToken token)
+		public static bool TryConstantToken(string expr, out Type token)
 		{
 			if (IsIntgerToken(expr))
 			{
-				token = new ConstantSyntaxToken(expr, typeof(int));
+				token = typeof(int);
 				return true;
 			}
 			if (IsBoolToken(expr))
 			{
-				token = new ConstantSyntaxToken(expr, typeof(bool));
+				token = typeof(bool);
 				return true;
 			}
 			if (IsDoubleToken(expr))
 			{
-				token = new ConstantSyntaxToken(expr, typeof(double));
+				token = typeof(double);
 				return true;
 			}
 			if (IsStringToken(expr))
 			{
-				token = new ConstantSyntaxToken(expr, typeof(string));
+				token = typeof(string);
 				return true;
 			}
 			if (IsCharToken(expr))
 			{
-				token = new ConstantSyntaxToken(expr, typeof(char));
+				token = typeof(char);
 				return true;
 			}
 			token = null;
@@ -174,7 +174,7 @@ namespace Soul.Expressions
 		/// <param name="expr"></param>
 		/// <param name="match"></param>
 		/// <returns></returns>
-		public static bool TryIncludeSyntax(string expr, out Match match)
+		public static bool TryIncludeToken(string expr, out Match match)
 		{
 			match = Regex.Match(expr, @"\((?<expr>.+)\)");
 			return match.Success;
@@ -186,7 +186,7 @@ namespace Soul.Expressions
 		/// <param name="expr"></param>
 		/// <param name="match"></param>
 		/// <returns></returns>
-		public static bool TryUnarySyntax(string expr, out Match match)
+		public static bool TryUnaryToken(string expr, out Match match)
 		{
 			match = Regex.Match(expr, @"\!(?<expr1>\w+|\w+\.\w+|#\{\d+\})");
 			return match.Success;
@@ -199,7 +199,7 @@ namespace Soul.Expressions
 		/// <param name="math"></param>
 		/// <param name="args"></param>
 		/// <returns></returns>
-		public static bool TryBinarySyntax(string expr, out Match math)
+		public static bool TryBinaryToken(string expr, out Match math)
 		{
 			var args = new List<string>
 			{
@@ -230,7 +230,7 @@ namespace Soul.Expressions
 		/// <param name="expr"></param>
 		/// <param name="match"></param>
 		/// <returns></returns>
-		public static bool TryMethodCallSyntax(string expr, out Match match)
+		public static bool TryMethodCallToken(string expr, out Match match)
 		{
 			match = Regex.Match(expr, @"((?<type>\w+\.)*)(?<name>\w+)\((?<args>[^\(|\)]+)\)");
 			return match.Success;

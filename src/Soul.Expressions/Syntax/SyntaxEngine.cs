@@ -50,14 +50,16 @@ namespace Soul.Expressions
 			{
 				//处理参数
 				var parameter = tree.GetParameter(expr);
-				return tree.AddToken(new ParameterSyntaxToken(parameter.Name, parameter.Value, parameter.Type));
+				var token = new ParameterToken(parameter.Name, parameter.Value, parameter.Type);
+				return tree.AddToken(token);
 			}
-			if (SyntaxUtility.TryConstantSyntaxToken(expr, out ConstantSyntaxToken constantSyntaxToken))
+			if (SyntaxUtility.TryConstantToken(expr, out Type constantType))
 			{
 				//处理常量
-				return tree.AddToken(constantSyntaxToken);
+				var token = new ConstantToken(expr, constantType);
+				return tree.AddToken(token);
 			}
-			if (SyntaxUtility.TryMethodCallSyntax(expr, out Match methodCallMatch))
+			if (SyntaxUtility.TryMethodCallToken(expr, out Match methodCallMatch))
 			{
 				//处理函数
 				var type = methodCallMatch.Groups["type"].Value;
@@ -71,12 +73,12 @@ namespace Soul.Expressions
 					var argKey = Watch(item, tree);
 					parameters.Add(argKey);
 				}
-				var token = new MethodCallSyntaxToken(type, name, parameters.ToArray());
+				var token = new MethodCallToken(type, name, parameters.ToArray());
 				var key = tree.AddToken(token);
 				var newExpr = expr.Replace(value, key);
 				return Watch(newExpr, tree);
 			}
-			if (SyntaxUtility.TryIncludeSyntax(expr, out Match includeMatch))
+			if (SyntaxUtility.TryIncludeToken(expr, out Match includeMatch))
 			{
 				//处理括号
 				var expr1 = includeMatch.Groups["expr"].Value;
@@ -85,17 +87,17 @@ namespace Soul.Expressions
 				var newExpr = expr.Replace(value, key);
 				return Watch(newExpr, tree);
 			}
-			if (SyntaxUtility.TryUnarySyntax(expr, out Match unaryMatch))
+			if (SyntaxUtility.TryUnaryToken(expr, out Match unaryMatch))
 			{
 				//处理逻辑非
 				var expr1 = unaryMatch.Groups["expr1"].Value;
 				var value = unaryMatch.Value;
 				var key1 = Watch(expr1, tree);
-				var key = tree.AddToken(new UnaryNotSyntaxToken(key1, "!"));
+				var key = tree.AddToken(new UnaryToken(key1, "!"));
 				var newExpr = expr.Replace(value, key);
 				return Watch(newExpr, tree);
 			}
-			if (SyntaxUtility.TryBinarySyntax(expr, out Match binaryMatch))
+			if (SyntaxUtility.TryBinaryToken(expr, out Match binaryMatch))
 			{
 				//处理二元运算
 				var expr1 = binaryMatch.Groups["expr1"].Value;
@@ -104,7 +106,7 @@ namespace Soul.Expressions
 				var value = binaryMatch.Value;
 				var key1 = Watch(expr1, tree);
 				var key3 = Watch(expr3, tree);
-				var key = tree.AddToken(new BinarySyntaxToken(key1, expr2, key3));
+				var key = tree.AddToken(new BinaryToken(key1, expr2, key3));
 				var newExpr = expr.Replace(value, key);
 				return Watch(newExpr, tree);
 			}

@@ -2,13 +2,13 @@
 
 namespace Soul.Expressions.Tokens
 {
-	public class ConstantSyntaxToken : SyntaxToken
+	public class ConstantToken : SyntaxToken
 	{
 		public string Value { get; }
 		public Type Type { get; }
-		public override SyntaxTokenType TokenType => SyntaxTokenType.Constant;
+		public override TokenType TokenType => TokenType.Constant;
 
-		public ConstantSyntaxToken(string value, Type type)
+		public ConstantToken(string value, Type type)
 		{
 			Debug = value;
 			Value = value;

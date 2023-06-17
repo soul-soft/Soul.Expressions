@@ -6,10 +6,10 @@ namespace Soul.Expressions.Test
 	{
 		static void Main(string[] args)
 		{
-			var syntax = SyntaxEngine.Run("pow(2,age) + 2", new SyntaxParameter("age", 20));
+			var syntax = SyntaxEngine.Run("(1+2)/2", new SyntaxParameter("age", 20));
 			Console.WriteLine(syntax.Raw);
 			//var expression = SyntaxCompiler.Lambda(syntax);
-			Test();
+			//Test();
 		}
 
 		public static void Test()
