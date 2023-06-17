@@ -10,11 +10,13 @@ namespace Soul.Expressions.Test
 	{
 		static void Main(string[] args)
 		{
+			Expression<Func<P, int>> expr = p => p.Age;
+
 			var syntax = SyntaxEngine.Run("p.Age", new SyntaxParameter("p", typeof(P)));
 			SyntaxCompiler.RegisterStaticMethods(typeof(Funcs));
 			var expression = SyntaxCompiler.Lambda(syntax);
 			var func = expression.Compile();
-			Console.WriteLine(func.DynamicInvoke());
+			Console.WriteLine(func.DynamicInvoke(new P { Age = 20 }));
 			Test();
 		}
 

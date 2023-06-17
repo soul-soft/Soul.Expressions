@@ -1,24 +1,16 @@
 ﻿namespace Soul.Expressions.Tokens
 {
-	public class MethodCallToken : SyntaxToken
+	public class StaticMethodCallToken : SyntaxToken
 	{
 		public string Type { get; }
 		public string Method { get; }
 		public string[] Arguments { get; }
 
-		public MethodCallToken(string type, string method, string[] arguments)
+		public StaticMethodCallToken(string method, string[] arguments)
 		{
-			Type = type;
+			Raw = $"{method}({string.Join(",", arguments)})";
 			Method = method;
 			Arguments = arguments;
-			if (string.IsNullOrEmpty(type))
-			{
-				Raw = $"{method}({string.Join(",", arguments)})";
-			}
-			else
-			{
-				Raw = $"{type}{method}({string.Join(",", arguments)})";
-			}
 		}
 
 	}

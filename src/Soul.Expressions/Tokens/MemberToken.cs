@@ -1,11 +1,11 @@
 ﻿namespace Soul.Expressions.Tokens
 {
-	public class MemberAccessToken : SyntaxToken
+	public class MemberToken : SyntaxToken
 	{
 		public string Expression { get; }
 		public string Member { get; }
 
-		public MemberAccessToken(string expression, string member)
+		public MemberToken(string expression, string member)
 		{
 			Raw = $"{expression}.{member}";
 			Expression = expression;

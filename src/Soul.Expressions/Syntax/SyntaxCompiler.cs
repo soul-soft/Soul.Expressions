@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Soul.Expressions.Tokens;
@@ -46,6 +47,13 @@ namespace Soul.Expressions
 				return Expression.Parameter(parameterToken.Type, parameterToken.Name);
 			}
 
+			if (token is MemberToken memberToken)
+			{
+				var expression = context.GetExpression(memberToken.Expression);
+				var member = expression.Type.GetMember(memberToken.Member).First();
+				return Expression.MakeMemberAccess(expression, member);
+			}
+
 			if (token is ConstantToken constantToken)
 			{
 				var value = constantToken.ParsedValue();
@@ -85,7 +93,7 @@ namespace Soul.Expressions
 				return Expression.MakeBinary(type, left, right);
 			}
 
-			if (token is MethodCallToken methodCallToken)
+			if (token is StaticMethodCallToken methodCallToken)
 			{
 				Methods.TryGetValue(methodCallToken.Method,out MethodInfo method);
 				var parameters = context.GetExpressions(methodCallToken.Arguments);

@@ -67,7 +67,7 @@ namespace Soul.Expressions
 				var expr2 = memberAccessMatch.Groups["expr2"].Value;
 				var value = memberAccessMatch.Value;
 				var key1 = Watch(expr1, tree);
-				var token = new MemberAccessToken(key1, expr2);
+				var token = new MemberToken(key1, expr2);
 				var key = tree.AddToken(token);
 				var newExpr = expr.Replace(value, key);
 				return Watch(newExpr, tree);
@@ -86,7 +86,7 @@ namespace Soul.Expressions
 					var argKey = Watch(item, tree);
 					parameters.Add(argKey);
 				}
-				var token = new MethodCallToken(type, name, parameters.ToArray());
+				var token = new StaticMethodCallToken(name, parameters.ToArray());
 				var key = tree.AddToken(token);
 				var newExpr = expr.Replace(value, key);
 				return Watch(newExpr, tree);
