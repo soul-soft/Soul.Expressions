@@ -2,9 +2,6 @@
 {
 	public abstract class SyntaxToken
 	{
-		public string Debug { get; protected set; }
-		
-		public virtual TokenType TokenType { get; }
-	
+		public string Raw { get; protected set; }
 	}
 }

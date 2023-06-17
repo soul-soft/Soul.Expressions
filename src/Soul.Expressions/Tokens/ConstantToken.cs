@@ -6,13 +6,43 @@ namespace Soul.Expressions.Tokens
 	{
 		public string Value { get; }
 		public Type Type { get; }
-		public override TokenType TokenType => TokenType.Constant;
 
 		public ConstantToken(string value, Type type)
 		{
-			Debug = value;
+			Raw = value;
 			Value = value;
 			Type = type;
 		}
+
+		public object ParsedValue()
+		{
+			if (typeof(string) == Type)
+			{
+				if (Value == "\"\"")
+				{
+					return string.Empty;
+				}
+				return Value.Substring(1, Value.Length - 2);
+			}
+			if (typeof(char) == Type)
+			{
+				var ch = Value.Substring(1, Value.Length - 2);
+				return Convert.ToChar(ch);
+			}
+			if (typeof(int) == Type)
+			{
+				return Convert.ToInt32(Value);
+			}
+			if (typeof(double) == Type)
+			{
+				return Convert.ToDouble(Value);
+			}
+			if (typeof(bool) == Type)
+			{
+				return Convert.ToBoolean(Value);
+			}
+			return null;
+		}
+
 	}
 }

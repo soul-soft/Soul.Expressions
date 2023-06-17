@@ -66,7 +66,7 @@ namespace Soul.Expressions
 				var name = methodCallMatch.Groups["name"].Value;
 				var argsExpr = methodCallMatch.Groups["args"].Value;
 				var value = methodCallMatch.Value;
-				var args = SyntaxUtility.SplitArguments(argsExpr);
+				var args = SyntaxUtility.SplitArgumentsToken(argsExpr);
 				var parameters = new List<string>();
 				foreach (var item in args)
 				{

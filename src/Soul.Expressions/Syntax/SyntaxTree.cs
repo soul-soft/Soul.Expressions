@@ -43,7 +43,7 @@ namespace Soul.Expressions
 				var sb = new StringBuilder();
 				foreach (var token in _tokens)
 				{
-					sb.AppendLine($"{token.Key} = {token.Value.Debug}");
+					sb.AppendLine($"{token.Key} = {token.Value.Raw}");
 				}
 				return sb.ToString();
 			}

@@ -2,17 +2,16 @@
 {
 	public class UnaryToken : SyntaxToken
 	{
-		public string Expr { get; }
-		public string Operator { get; }
-		public override TokenType TokenType => TokenType.Unary;
+		public string Operand { get; }
+		public string Type { get; }
 
-		public UnaryToken(string expr, string @operator)
+		public UnaryToken(string operand, string type)
 		{
-			Expr = expr;
-			Operator = @operator;
-			if (@operator == "!")
+			Operand = operand;
+			Type = type;
+			if (type == "!")
 			{
-				Debug = $"!{expr}";
+				Raw = $"!{operand}";
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using Soul.Expressions.Tokens;
 
@@ -15,27 +16,27 @@ namespace Soul.Expressions
 		/// <returns></returns>
 		public static bool TryConstantToken(string expr, out Type token)
 		{
-			if (IsIntgerToken(expr))
+			if (IsIntgerConstantToken(expr))
 			{
 				token = typeof(int);
 				return true;
 			}
-			if (IsBoolToken(expr))
+			if (IsBoolConstantToken(expr))
 			{
 				token = typeof(bool);
 				return true;
 			}
-			if (IsDoubleToken(expr))
+			if (IsDoubleConstantToken(expr))
 			{
 				token = typeof(double);
 				return true;
 			}
-			if (IsStringToken(expr))
+			if (IsStringConstantToken(expr))
 			{
 				token = typeof(string);
 				return true;
 			}
-			if (IsCharToken(expr))
+			if (IsCharConstantToken(expr))
 			{
 				token = typeof(char);
 				return true;
@@ -43,12 +44,13 @@ namespace Soul.Expressions
 			token = null;
 			return false;
 		}
+		
 		/// <summary>
 		/// 是否为字符串常量
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool IsStringToken(string expr)
+		public static bool IsStringConstantToken(string expr)
 		{
 			if (expr.Length < 2)
 			{
@@ -65,12 +67,13 @@ namespace Soul.Expressions
 			}
 			return true;
 		}
+		
 		/// <summary>
 		/// 是否为字符串
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool IsCharToken(string expr)
+		public static bool IsCharConstantToken(string expr)
 		{
 			if (expr.Length < 3)
 			{
@@ -91,30 +94,33 @@ namespace Soul.Expressions
 			}
 			return true;
 		}
+		
 		/// <summary>
 		/// 是否为整数
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool IsIntgerToken(string expr)
+		public static bool IsIntgerConstantToken(string expr)
 		{
 			return Regex.IsMatch(expr, @"^\d+$");
 		}
+		
 		/// <summary>
 		/// 是否为浮点数
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool IsDoubleToken(string expr)
+		public static bool IsDoubleConstantToken(string expr)
 		{
 			return Regex.IsMatch(expr, @"^\d+\.\d+$");
 		}
+		
 		/// <summary>
 		/// 是否为布尔值
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool IsBoolToken(string expr)
+		public static bool IsBoolConstantToken(string expr)
 		{
 			if (expr == "true")
 			{
@@ -126,12 +132,13 @@ namespace Soul.Expressions
 			}
 			return false;
 		}
+		
 		/// <summary>
 		/// 分割函数参数
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static string[] SplitArguments(string expr)
+		public static string[] SplitArgumentsToken(string expr)
 		{
 			var args = new List<string>();
 			var index = 0;
@@ -234,6 +241,47 @@ namespace Soul.Expressions
 		{
 			match = Regex.Match(expr, @"((?<type>\w+\.)*)(?<name>\w+)\((?<args>[^\(|\)]+)\)");
 			return match.Success;
+		}
+		/// <summary>
+		/// 获取表达式类型
+		/// </summary>
+		/// <param name="token"></param>
+		/// <returns></returns>
+		/// <exception cref="InvalidOperationException"></exception>
+		public static ExpressionType GetExpressionType(string token)
+		{
+			switch (token)
+			{
+				case "==":
+					return ExpressionType.Equal;
+				case "!=":
+					return ExpressionType.NotEqual;
+				case ">":
+					return ExpressionType.GreaterThan;
+				case "<":
+					return ExpressionType.LessThan;
+				case ">=":
+					return ExpressionType.GreaterThanOrEqual;
+				case "<=":
+					return ExpressionType.LessThanOrEqual;
+				case "+":
+					return ExpressionType.Add;
+				case "-":
+					return ExpressionType.Subtract;
+				case "*":
+					return ExpressionType.Multiply;
+				case "/":
+					return ExpressionType.Divide;
+				case "%":
+					return ExpressionType.Divide;
+				case "&&":
+					return ExpressionType.AndAlso;
+				case "||":
+					return ExpressionType.OrElse;
+				case "!":
+					return ExpressionType.Not;
+			}
+			throw new InvalidOperationException();
 		}
 	}
 }

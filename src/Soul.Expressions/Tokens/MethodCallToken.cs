@@ -6,8 +6,6 @@
 		public string Name { get; }
 		public string[] Args { get; }
 
-		public override TokenType TokenType => TokenType.MethodCall;
-
 		public MethodCallToken(string type, string name, string[] args)
 		{
 			Type = type;
@@ -15,11 +13,11 @@
 			Args = args;
 			if (string.IsNullOrEmpty(type))
 			{
-				Debug = $"{name}({string.Join(",", args)})";
+				Raw = $"{name}({string.Join(",", args)})";
 			}
 			else
 			{
-				Debug = $"{type}{name}({string.Join(",", args)})";
+				Raw = $"{type}{name}({string.Join(",", args)})";
 			}
 		}
 

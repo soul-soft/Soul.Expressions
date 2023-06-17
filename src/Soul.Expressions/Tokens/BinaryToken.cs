@@ -3,15 +3,14 @@
 	public class BinaryToken : SyntaxToken
 	{
 		public string Left { get; }
-		public string Operator { get; }
+		public string BinaryType { get; }
 		public string Right { get; }
-		public override TokenType TokenType => TokenType.Binary;
 
-		public BinaryToken(string left, string @operator, string right)
+		public BinaryToken(string left, string binaryType, string right)
 		{
-			Debug = $"{left} {@operator} {right}";
+			Raw = $"{left} {binaryType} {right}";
 			Left = left;
-			Operator = @operator;
+			BinaryType = binaryType;
 			Right = right;
 		}
 	}
