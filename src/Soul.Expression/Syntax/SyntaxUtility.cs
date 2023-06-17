@@ -15,6 +15,10 @@ namespace Soul.Expression
 		/// <returns></returns>
 		public static bool IsConstant(string expr)
 		{
+			if (IsBool(expr))
+			{
+				return true;
+			}
 			if (IsNumber(expr))
 			{
 				return true;
@@ -103,6 +107,23 @@ namespace Soul.Expression
 		public static bool IsDouble(string expr)
 		{
 			return Regex.IsMatch(expr, @"^\d+\.\d+$");
+		}
+		/// <summary>
+		/// 是否为布尔值
+		/// </summary>
+		/// <param name="expr"></param>
+		/// <returns></returns>
+		public static bool IsBool(string expr)
+		{
+			if (expr == "true")
+			{
+				return true;
+			}
+			if (expr == "false")
+			{
+				return true;
+			}
+			return false;
 		}
 		/// <summary>
 		/// 分割函数参数
