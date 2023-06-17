@@ -9,6 +9,15 @@ namespace Soul.Expression
 	public static class SyntaxUtility
 	{
 		/// <summary>
+		/// 是否为参数
+		/// </summary>
+		/// <param name="expr"></param>
+		/// <returns></returns>
+		public static bool IsParameter(string expr)
+		{
+			return Regex.IsMatch(expr, @"\w+\.*\w+");
+		}
+		/// <summary>
 		/// 是否为常量
 		/// </summary>
 		/// <param name="expr"></param>

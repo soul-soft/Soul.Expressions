@@ -49,8 +49,8 @@ namespace Soul.Expression
 			{
 				//处理常量
 				return expr;
-			}
-			else if (MatchMethodSyntax(expr, out Match methodMatch))
+			}			
+			if (MatchMethodSyntax(expr, out Match methodMatch))
 			{
 				//处理函数
 				var name = methodMatch.Groups["name"].Value;
@@ -62,7 +62,7 @@ namespace Soul.Expression
 				var funcKey = tree.AddToken(token);
 				return funcKey;
 			}
-			else if (MatchIncludeSyntax(expr, out Match includeMatch))
+			if (MatchIncludeSyntax(expr, out Match includeMatch))
 			{
 				//处理括号
 				var expr1 = includeMatch.Groups["expr"].Value;
@@ -71,7 +71,7 @@ namespace Soul.Expression
 				var text = expr.Replace(value, key);
 				return Watch(text, tree);
 			}
-			else if (MatchUnarySyntax(expr, out Match unaryMatch))
+			if (MatchUnarySyntax(expr, out Match unaryMatch))
 			{
 				//处理逻辑非
 				var expr1 = unaryMatch.Groups["expr1"].Value;
@@ -80,7 +80,7 @@ namespace Soul.Expression
 				var text = expr.Replace(value, key);
 				return Watch(text, tree);
 			}
-			else if (MatchBinarySyntax(expr, out Match multiplyMtch, @"\*|/|%"))
+			if (MatchBinarySyntax(expr, out Match multiplyMtch, @"\*|/|%"))
 			{
 				//处理乘法
 				var expr1 = multiplyMtch.Groups["expr1"].Value;
@@ -92,7 +92,7 @@ namespace Soul.Expression
 				Watch(text, tree);
 				return key;
 			}
-			else if (MatchBinarySyntax(expr, out Match addMatch, @"\+|\-"))
+			if (MatchBinarySyntax(expr, out Match addMatch, @"\+|\-"))
 			{
 				//处理加减
 				var expr1 = addMatch.Groups["expr1"].Value;
@@ -104,7 +104,7 @@ namespace Soul.Expression
 				Watch(text, tree);
 				return key;
 			}
-			else if (MatchBinarySyntax(expr, out Match relatMatch, @">|<|>=|<="))
+			if (MatchBinarySyntax(expr, out Match relatMatch, @">|<|>=|<="))
 			{
 				//处理关系
 				var expr1 = relatMatch.Groups["expr1"].Value;
@@ -140,7 +140,7 @@ namespace Soul.Expression
 				Watch(text, tree);
 				return key;
 			}
-			else if (MatchBinarySyntax(expr, out Match orMatch, @"\|\|"))
+			if (MatchBinarySyntax(expr, out Match orMatch, @"\|\|"))
 			{
 				//处理逻辑或
 				var expr1 = orMatch.Groups["expr1"].Value;
@@ -152,11 +152,13 @@ namespace Soul.Expression
 				Watch(text, tree);
 				return key;
 			}
-			else
+			if (SyntaxUtility.IsParameter(expr))
 			{
-				var message = string.Format("不支持的语法：{0}", expr);
-				throw new NotImplementedException(message);
+				//处理常量
+				return expr;
 			}
+			var message = string.Format("Unrecognized syntax token：“{0}”", expr);
+			throw new NotImplementedException(message);
 		}
 
 		/// <summary>
@@ -192,7 +194,7 @@ namespace Soul.Expression
 		/// <returns></returns>
 		private static bool MatchBinarySyntax(string expr, out Match math, string args)
 		{
-			var pattern = $@"(?<expr1>(\w+|#\{{\d+\}}))\s*(?<expr2>({args}))\s*(?<expr3>(\w+|#\{{\d+\}})+)";
+			var pattern = $@"(?<expr1>(\w+\.*\w+|#\{{\d+\}}))\s*(?<expr2>({args}))\s*(?<expr3>(\w+\.*\w+|#\{{\d+\}})+)";
 			math = Regex.Match(expr, pattern);
 			return math.Success;
 		}
@@ -205,7 +207,7 @@ namespace Soul.Expression
 		/// <returns></returns>
 		private static bool MatchMethodSyntax(string expr, out Match match)
 		{
-			match = Regex.Match(expr, @"(?<name>\w+)\((?<args>[^\(|\)]+)\)");
+			match = Regex.Match(expr, @"(?<name>\w+\.*\w+)\((?<args>[^\(|\)]+)\)");
 			return match.Success;
 		}
 
