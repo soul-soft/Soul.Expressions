@@ -13,13 +13,15 @@ namespace Soul.Expressions
 
 		private Dictionary<string, SyntaxToken> _tokens = new Dictionary<string, SyntaxToken>();
 
+		public IReadOnlyDictionary<string,SyntaxToken> Tokens => _tokens;
+
 		internal SyntaxTree(string text, SyntaxParameter[] parameters)
 		{
 			Text = text;
 			_parameters = new HashSet<SyntaxParameter>(parameters);
 		}
 
-		public bool ContainsKey(string key)
+		public bool ContainsToken(string key)
 		{
 			return _tokens.ContainsKey(key);
 		}
@@ -29,6 +31,11 @@ namespace Soul.Expressions
 			return _parameters.Any(a => a.Name == name);
 		}
 
+		public SyntaxParameter GetParameter(string name)
+		{
+			return _parameters.Where(a => a.Name == name).FirstOrDefault();
+		}
+
 		public string Raw
 		{
 			get
@@ -36,7 +43,7 @@ namespace Soul.Expressions
 				var sb = new StringBuilder();
 				foreach (var token in _tokens)
 				{
-					sb.AppendLine($"{token.Key} = {token.Value.Text}");
+					sb.AppendLine($"{token.Key} = {token.Value.Debug}");
 				}
 				return sb.ToString();
 			}

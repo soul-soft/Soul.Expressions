@@ -7,9 +7,9 @@
 		public string Right { get; }
 		public override SyntaxTokenType TokenType => SyntaxTokenType.Binary;
 
-		public BinarySyntaxToken(string text, string left, string @operator, string right)
+		public BinarySyntaxToken(string left, string @operator, string right)
 		{
-			Text = text;
+			Debug = $"{left} {@operator} {right}";
 			Left = left;
 			Operator = @operator;
 			Right = right;

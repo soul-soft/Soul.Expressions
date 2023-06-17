@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using Soul.Expressions.Tokens;
 
 namespace Soul.Expressions
 {
@@ -19,9 +21,26 @@ namespace Soul.Expressions
 			Methods.Add(name, method.Method);
 		}
 
-		public static LambdaExpression MakeLambda(SyntaxTree tree)
+		public static LambdaExpression Lambda(string expr, params SyntaxParameter[] parameters)
+		{
+			var tree = SyntaxEngine.Run(expr, parameters);
+			return Lambda(tree);
+		}
+
+		public static LambdaExpression Lambda(SyntaxTree tree)
+		{
+			var context = new SyntaxCompilerContext(tree);
+			foreach (var item in tree.Tokens)
+			{
+				context.AddExpression(item.Key, Watch(item.Value, context));
+			}
+			return null;
+		}
+
+		private static Expression Watch(SyntaxToken token, SyntaxCompilerContext context)
 		{
 			return null;
 		}
+
 	}
 }

@@ -1,35 +1,46 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Soul.Expressions.Tokens;
 
 namespace Soul.Expressions
 {
 	internal static class SyntaxUtility
 	{
-		#region Token
 		/// <summary>
 		/// 是否为常量
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool IsConstantToken(string expr)
+		public static bool TryConstantSyntaxToken(string expr, out ConstantSyntaxToken token)
 		{
-			if (IsBoolToken(expr))
+			if (IsIntgerToken(expr))
 			{
+				token = new ConstantSyntaxToken(expr, typeof(int));
 				return true;
 			}
-			if (IsNumberToken(expr))
+			if (IsBoolToken(expr))
 			{
+				token = new ConstantSyntaxToken(expr, typeof(bool));
+				return true;
+			}
+			if (IsDoubleToken(expr))
+			{
+				token = new ConstantSyntaxToken(expr, typeof(double));
 				return true;
 			}
 			if (IsStringToken(expr))
 			{
+				token = new ConstantSyntaxToken(expr, typeof(string));
 				return true;
 			}
 			if (IsCharToken(expr))
 			{
+				token = new ConstantSyntaxToken(expr, typeof(char));
 				return true;
 			}
+			token = null;
 			return false;
 		}
 		/// <summary>
@@ -81,15 +92,6 @@ namespace Soul.Expressions
 			return true;
 		}
 		/// <summary>
-		/// 是否为数字常量
-		/// </summary>
-		/// <param name="expr"></param>
-		/// <returns></returns>
-		public static bool IsNumberToken(string expr)
-		{
-			return Regex.IsMatch(expr, @"^\d+(\.\d)*$");
-		}
-		/// <summary>
 		/// 是否为整数
 		/// </summary>
 		/// <param name="expr"></param>
@@ -129,7 +131,7 @@ namespace Soul.Expressions
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static string[] MatchParameterTokens(string expr)
+		public static string[] SplitArguments(string expr)
 		{
 			var args = new List<string>();
 			var index = 0;
@@ -165,6 +167,73 @@ namespace Soul.Expressions
 			}
 			return args.Select(s => s.Trim()).ToArray();
 		}
-		#endregion
+
+		/// <summary>
+		/// 处理括号运算
+		/// </summary>
+		/// <param name="expr"></param>
+		/// <param name="match"></param>
+		/// <returns></returns>
+		public static bool TryIncludeSyntax(string expr, out Match match)
+		{
+			match = Regex.Match(expr, @"\((?<expr>.+)\)");
+			return match.Success;
+		}
+
+		/// <summary>
+		/// 处理逻辑非
+		/// </summary>
+		/// <param name="expr"></param>
+		/// <param name="match"></param>
+		/// <returns></returns>
+		public static bool TryUnarySyntax(string expr, out Match match)
+		{
+			match = Regex.Match(expr, @"\!(?<expr1>\w+|\w+\.\w+|#\{\d+\})");
+			return match.Success;
+		}
+
+		/// <summary>
+		/// 二元运算
+		/// </summary>
+		/// <param name="expr"></param>
+		/// <param name="math"></param>
+		/// <param name="args"></param>
+		/// <returns></returns>
+		public static bool TryBinarySyntax(string expr, out Match math)
+		{
+			var args = new List<string>
+			{
+				 @"\*|/|%",
+				 @"\+|\-",
+				 @">|<|>=|<=",
+				 @"==|!=",
+				 @"&&",
+				 @"\|\|"
+			};
+			foreach (var item in args)
+			{
+				var pattern = $@"(?<expr1>(\w+|\w+\.\w+|#\{{\d+\}}))\s*(?<expr2>({item}))\s*(?<expr3>(\w+|\w+\.\w+|#\{{\d+\}}))";
+				math = Regex.Match(expr, pattern);
+				if (math.Success)
+				{
+					return true;
+				}
+			}
+			math = null;
+			return false;
+		}
+
+
+		/// <summary>
+		/// 匹配函数调用
+		/// </summary>
+		/// <param name="expr"></param>
+		/// <param name="match"></param>
+		/// <returns></returns>
+		public static bool TryMethodCallSyntax(string expr, out Match match)
+		{
+			match = Regex.Match(expr, @"((?<type>\w+\.)*)(?<name>\w+)\((?<args>[^\(|\)]+)\)");
+			return match.Success;
+		}
 	}
 }

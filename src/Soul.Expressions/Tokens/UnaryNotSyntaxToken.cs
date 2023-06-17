@@ -1,14 +1,14 @@
 ﻿namespace Soul.Expressions.Tokens
 {
-	public class UnarySyntaxToken : SyntaxToken
+	public class UnaryNotSyntaxToken : SyntaxToken
 	{
 		public string Expr { get; }
 		public string Operator { get; }
 		public override SyntaxTokenType TokenType => SyntaxTokenType.Unary;
 
-		public UnarySyntaxToken(string text, string expr, string @operator)
+		public UnaryNotSyntaxToken(string expr, string @operator)
 		{
-			Text = text;
+			Debug = $"!{expr}";
 			Expr = expr;
 			Operator = @operator;
 		}

@@ -3,7 +3,9 @@
 	public enum SyntaxTokenType
 	{
 		Binary,
-		Method,
-		Unary
+		MethodCall,
+		Unary,
+		Constant,
+		Parameter
 	}
 }
