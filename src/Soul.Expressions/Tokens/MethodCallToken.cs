@@ -3,21 +3,21 @@
 	public class MethodCallToken : SyntaxToken
 	{
 		public string Type { get; }
-		public string Name { get; }
-		public string[] Args { get; }
+		public string Method { get; }
+		public string[] Arguments { get; }
 
-		public MethodCallToken(string type, string name, string[] args)
+		public MethodCallToken(string type, string method, string[] arguments)
 		{
 			Type = type;
-			Name = name;
-			Args = args;
+			Method = method;
+			Arguments = arguments;
 			if (string.IsNullOrEmpty(type))
 			{
-				Raw = $"{name}({string.Join(",", args)})";
+				Raw = $"{method}({string.Join(",", arguments)})";
 			}
 			else
 			{
-				Raw = $"{type}{name}({string.Join(",", args)})";
+				Raw = $"{type}{method}({string.Join(",", arguments)})";
 			}
 		}
 

@@ -27,6 +27,14 @@ namespace Soul.Expressions
 			return Expressions[key];
 		}
 
+		public IEnumerable<Expression> GetExpressions(string[] names)
+		{
+			foreach (var item in names)
+			{
+				yield return Expressions[item];
+			}
+		}
+
 		public Expression GetBody()
 		{
 			var key = SyntaxTree.Tokens.Keys.Last();

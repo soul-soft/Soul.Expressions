@@ -8,21 +8,9 @@ namespace Soul.Expressions
 		public object Value { get; }
 		public Type Type { get; }
 
-		public SyntaxParameter(string name, object value)
-		{
-			if (value is null)
-			{
-				throw new ArgumentNullException(nameof(value));
-			}
-			Name = name;
-			Value = value;
-			Type = value.GetType();
-		}
-
-		public SyntaxParameter(string name, object value, Type type)
+		public SyntaxParameter(string name, Type type)
 		{
 			Name = name;
-			Value = value;
 			Type = type;
 		}
 

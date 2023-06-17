@@ -219,7 +219,7 @@ namespace Soul.Expressions
 			};
 			foreach (var item in args)
 			{
-				var pattern = $@"(?<expr1>(\w+|\w+\.\w+|#\{{\d+\}}))\s*(?<expr2>({item}))\s*(?<expr3>(\w+|\w+\.\w+|#\{{\d+\}}))";
+				var pattern = $@"(?<expr1>[^\s|\*|/|%|\+|\-|>|<|=||&|\|]+)\s*(?<expr2>({item}))\s*(?<expr3>[^\s|\*|/|%|\+|\-|>|<|=||&|\|]+)";
 				math = Regex.Match(expr, pattern);
 				if (math.Success)
 				{
@@ -241,6 +241,17 @@ namespace Soul.Expressions
 		{
 			match = Regex.Match(expr, @"((?<type>\w+\.)*)(?<name>\w+)\((?<args>[^\(|\)]+)\)");
 			return match.Success;
+		}
+		/// <summary>
+		/// 匹配成员访问
+		/// </summary>
+		/// <param name="expr"></param>
+		/// <param name="math"></param>
+		/// <returns></returns>
+		public static bool TryMemberAccessToken(string expr,out Match math)
+		{
+			math = Regex.Match(expr, @"(?<expr1>[_a-zA-Z]\w*)\.(?<expr2>[_a-zA-Z]\w*)");
+			return math.Success;
 		}
 		/// <summary>
 		/// 获取表达式类型
@@ -273,7 +284,7 @@ namespace Soul.Expressions
 				case "/":
 					return ExpressionType.Divide;
 				case "%":
-					return ExpressionType.Divide;
+					return ExpressionType.Modulo;
 				case "&&":
 					return ExpressionType.AndAlso;
 				case "||":

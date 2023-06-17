@@ -36,7 +36,7 @@ namespace Soul.Expressions
 			return _parameters.Where(a => a.Name == name).FirstOrDefault();
 		}
 
-		public string Raw
+		public string Debug
 		{
 			get
 			{

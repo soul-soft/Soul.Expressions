@@ -11,14 +11,13 @@ namespace Soul.Expressions
 	{
 		public static Dictionary<string, MethodInfo> Methods = new Dictionary<string, MethodInfo>();
 
-		public static void RegisterMethod(string name, MethodInfo method)
+		public static void RegisterStaticMethods(Type type)
 		{
-			Methods.Add(name, method);
-		}
-
-		public static void RegisterMethod(string name, Delegate method)
-		{
-			Methods.Add(name, method.Method);
+			var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public);
+			foreach (var item in methods)
+			{
+				Methods.Add(item.Name,item);
+			}
 		}
 
 		public static LambdaExpression Lambda(string expr, params SyntaxParameter[] parameters)
@@ -55,7 +54,7 @@ namespace Soul.Expressions
 
 			if (token is UnaryToken unaryToken)
 			{
-				if (unaryToken.Type=="!")
+				if (unaryToken.Type == "!")
 				{
 					var expression = context.GetExpression(unaryToken.Operand);
 					return Expression.MakeUnary(ExpressionType.Not, expression, null);
@@ -72,9 +71,26 @@ namespace Soul.Expressions
 				var type = SyntaxUtility.GetExpressionType(binaryExpression.BinaryType);
 				var left = context.GetExpression(binaryExpression.Left);
 				var right = context.GetExpression(binaryExpression.Right);
+				if (left.Type == typeof(double) || right.Type == typeof(double))
+				{
+					if (left.Type != typeof(double))
+					{
+						left = Expression.Convert(left, typeof(double));
+					}
+					else
+					{
+						right = Expression.Convert(right, typeof(double));
+					}
+				}
 				return Expression.MakeBinary(type, left, right);
 			}
 
+			if (token is MethodCallToken methodCallToken)
+			{
+				Methods.TryGetValue(methodCallToken.Method,out MethodInfo method);
+				var parameters = context.GetExpressions(methodCallToken.Arguments);
+				return Expression.Call(method, parameters);
+			}
 			return null;
 		}
 	}

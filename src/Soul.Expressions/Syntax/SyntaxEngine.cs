@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using Soul.Expressions.Tokens;
 
@@ -37,7 +38,7 @@ namespace Soul.Expressions
 		/// 递归观察
 		/// </summary>
 		/// <param name="expr"></param>
-		/// <param name="token"></param>
+		/// <param name="tree"></param>
 		/// <returns></returns>
 		private static string Watch(string expr, SyntaxTree tree)
 		{
@@ -58,6 +59,18 @@ namespace Soul.Expressions
 				//处理常量
 				var token = new ConstantToken(expr, constantType);
 				return tree.AddToken(token);
+			}
+			if (SyntaxUtility.TryMemberAccessToken(expr, out Match memberAccessMatch))
+			{
+				//处理成员访问
+				var expr1 = memberAccessMatch.Groups["expr1"].Value;
+				var expr2 = memberAccessMatch.Groups["expr2"].Value;
+				var value = memberAccessMatch.Value;
+				var key1 = Watch(expr1, tree);
+				var token = new MemberAccessToken(key1, expr2);
+				var key = tree.AddToken(token);
+				var newExpr = expr.Replace(value, key);
+				return Watch(newExpr, tree);
 			}
 			if (SyntaxUtility.TryMethodCallToken(expr, out Match methodCallMatch))
 			{
