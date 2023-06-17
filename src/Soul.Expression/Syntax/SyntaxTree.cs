@@ -15,18 +15,11 @@ namespace Soul.Expression
 			Text = text;
 		}
 
-		internal string AddToken(SyntaxToken token)
-		{
-			var key = "#{" + _tokens.Count + "}";
-			_tokens.Add(key, token);
-			return key;
-		}
-
-		internal bool ContainsKey(string key)
+		public bool ContainsKey(string key)
 		{
 			return _tokens.ContainsKey(key);
 		}
-
+		
 		public string Raw 
 		{
 			get 
@@ -38,6 +31,13 @@ namespace Soul.Expression
 				}
 				return sb.ToString();
 			}
+		}
+
+		internal string AddToken(SyntaxToken token)
+		{
+			var key = "#{" + _tokens.Count + "}";
+			_tokens.Add(key, token);
+			return key;
 		}
 	}
 }

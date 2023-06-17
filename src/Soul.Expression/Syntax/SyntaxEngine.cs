@@ -11,9 +11,26 @@ namespace Soul.Expression
 	/// </summary>
 	public class SyntaxEngine
 	{
+		/// <summary>
+		/// 运行
+		/// </summary>
+		/// <param name="expr"></param>
+		/// <returns></returns>
 		public static SyntaxTree Run(string expr)
 		{
 			return Watch(expr);
+		}
+
+		/// <summary>
+		/// 观察
+		/// </summary>
+		/// <param name="expr"></param>
+		/// <returns></returns>
+		private static SyntaxTree Watch(string expr)
+		{
+			var tokens = new SyntaxTree(expr);
+			Watch(expr, tokens);
+			return tokens;
 		}
 
 		/// <summary>
@@ -27,6 +44,22 @@ namespace Soul.Expression
 			if (tree.ContainsKey(expr))
 			{
 				return expr;
+			}
+			if (SyntaxUtility.IsConstant(expr))
+			{
+				return expr;
+			}
+			else if (MatchMethodSyntax(expr, out Match match5))
+			{
+				var name = match5.Groups["name"].Value;
+				var args = match5.Groups["args"].Value;
+				var value = match5.Value;
+				var parameters = SyntaxUtility.SplitParameters(args);
+				var parametersArray = parameters.Select(arg => Watch(arg, tree))
+					.ToArray();
+				var token = new MethodSyntaxToken(value, name, parametersArray, expr);
+				var funcKey = tree.AddToken(token);
+				return funcKey;
 			}
 			else if (MatchUnarySyntax(expr, out Match match0))
 			{
@@ -77,18 +110,6 @@ namespace Soul.Expression
 				Watch(text, tree);
 				return key;
 			}
-			else if (MatchMethodSyntax(expr, out Match match5))
-			{
-				var name = match5.Groups["name"].Value;
-				var args = match5.Groups["args"].Value;
-				var value = match5.Value;
-				var parameters = SplitArguments(args)
-					.Select(arg => Watch(arg, tree))
-					.ToArray();
-				var token = new MethodSyntaxToken(value, name, parameters, expr);
-				var funcKey = tree.AddToken(token);
-				return funcKey;
-			}
 			else
 			{
 				var message = string.Format("不支持的语法：{0}", expr);
@@ -96,12 +117,6 @@ namespace Soul.Expression
 			}
 		}
 
-		private static SyntaxTree Watch(string expr)
-		{
-			var tokens = new SyntaxTree(expr);
-			Watch(expr, tokens);
-			return tokens;
-		}
 		/// <summary>
 		/// 是否是括号
 		/// </summary>
@@ -139,45 +154,6 @@ namespace Soul.Expression
 			match = Regex.Match(expr, @"(?<name>\w+)\((?<args>[^\(|\)]+)\)");
 			return match.Success;
 		}
-
-
-
-
-		private static string[] SplitArguments(string input)
-		{
-			var args = new List<string>();
-			var index = 0;
-			var quotes = new char[]
-			{
-				'"', '\''
-			};
-			var startQuotes = false;
-			for (int i = 0; i < input.Length; i++)
-			{
-				var item = input[i];
-				if (quotes.Contains(item))
-				{
-					if (!startQuotes)
-					{
-						index = i;
-						startQuotes = true;
-					}
-					else if (i > 0 && input[i - 1] != '\\')
-					{
-						startQuotes = false;
-					}
-				}
-				if ((!startQuotes && item == ','))
-				{
-					args.Add(input.Substring(index, i - index));
-					index = i + 1;
-				}
-				if (i == input.Length - 1)
-				{
-					args.Add(input.Substring(index, i - index + 1));
-				}
-			}
-			return args.ToArray();
-		}
+		
 	}
 }
