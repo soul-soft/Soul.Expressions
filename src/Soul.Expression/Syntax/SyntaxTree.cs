@@ -1,14 +1,18 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 using Soul.Expression.Tokens;
 
 namespace Soul.Expression
 {
 	public class SyntaxTree
 	{
+		public string Text { get; }
+		
 		public Dictionary<string, SyntaxToken> _tokens = new Dictionary<string, SyntaxToken>();
 
-		public SyntaxTree()
+		public SyntaxTree(string text)
 		{
+			Text = text;
 		}
 
 		internal string AddToken(SyntaxToken token)
@@ -21,6 +25,19 @@ namespace Soul.Expression
 		internal bool ContainsKey(string key)
 		{
 			return _tokens.ContainsKey(key);
+		}
+
+		public string Raw 
+		{
+			get 
+			{
+				var sb = new StringBuilder();
+				foreach (var token in _tokens)
+				{
+					sb.AppendLine($"{token.Key} = {token.Value.Text}");
+				}
+				return sb.ToString();
+			}
 		}
 	}
 }

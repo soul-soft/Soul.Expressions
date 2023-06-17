@@ -1,4 +1,6 @@
-﻿namespace Soul.Expression.Tokens
+﻿using static System.Net.Mime.MediaTypeNames;
+
+namespace Soul.Expression.Tokens
 {
 	public class MethodSyntaxToken : SyntaxToken
 	{
@@ -8,8 +10,9 @@
 
 		public override SyntaxTokenType TokenType => SyntaxTokenType.Method;
 
-		public MethodSyntaxToken(string name, string[] args, string expr)
+		public MethodSyntaxToken(string text, string name, string[] args, string expr)
 		{
+			Text = text;
 			Name = name;
 			Args = args;
 			Expr = expr;

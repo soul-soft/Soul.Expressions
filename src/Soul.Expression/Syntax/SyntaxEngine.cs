@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text.RegularExpressions;
 using Soul.Expression.Tokens;
 
@@ -40,8 +38,9 @@ namespace Soul.Expression
 				var expr1 = match1.Groups["expr1"].Value;
 				var expr2 = match1.Groups["expr2"].Value;
 				var expr3 = match1.Groups["expr3"].Value;
-				var key = tree.AddToken(new BinarySyntaxToken(expr1, expr2, expr3));
-				var text = expr.Replace(match1.Value, key);
+				var value = match1.Value;
+				var key = tree.AddToken(new BinarySyntaxToken(value, expr1, expr2, expr3));
+				var text = expr.Replace(value, key);
 				Watch(text, tree);
 				return key;
 			}
@@ -50,8 +49,9 @@ namespace Soul.Expression
 				var expr1 = match2.Groups["expr1"].Value;
 				var expr2 = match2.Groups["expr2"].Value;
 				var expr3 = match2.Groups["expr3"].Value;
-				var key = tree.AddToken(new BinarySyntaxToken(expr1, expr2, expr3));
-				var text = expr.Replace(match2.Value, key);
+				var value = match2.Value;
+				var key = tree.AddToken(new BinarySyntaxToken(value, expr1, expr2, expr3));
+				var text = expr.Replace(value, key);
 				Watch(text, tree);
 				return key;
 			}
@@ -60,8 +60,9 @@ namespace Soul.Expression
 				var expr1 = match3.Groups["expr1"].Value;
 				var expr2 = match3.Groups["expr2"].Value;
 				var expr3 = match3.Groups["expr3"].Value;
-				var key = tree.AddToken(new BinarySyntaxToken(expr1, expr2, expr3));
-				var text = expr.Replace(match3.Value, key);
+				var value = match3.Value;
+				var key = tree.AddToken(new BinarySyntaxToken(value, expr1, expr2, expr3));
+				var text = expr.Replace(value, key);
 				Watch(text, tree);
 				return key;
 			}
@@ -70,20 +71,21 @@ namespace Soul.Expression
 				var expr1 = match4.Groups["expr1"].Value;
 				var expr2 = match4.Groups["expr2"].Value;
 				var expr3 = match4.Groups["expr3"].Value;
-				var key = tree.AddToken(new BinarySyntaxToken(expr1, expr2, expr3));
-				var text = expr.Replace(match3.Value, key);
+				var value = match4.Value;
+				var key = tree.AddToken(new BinarySyntaxToken(value, expr1, expr2, expr3));
+				var text = expr.Replace(value, key);
 				Watch(text, tree);
 				return key;
 			}
-
 			else if (MatchMethodSyntax(expr, out Match match5))
 			{
 				var name = match5.Groups["name"].Value;
-				var argExpr = match5.Groups["args"].Value;
-				var args = SplitArguments(argExpr)
+				var args = match5.Groups["args"].Value;
+				var value = match5.Value;
+				var parameters = SplitArguments(args)
 					.Select(arg => Watch(arg, tree))
 					.ToArray();
-				var token = new MethodSyntaxToken(name, args, expr);
+				var token = new MethodSyntaxToken(value, name, parameters, expr);
 				var funcKey = tree.AddToken(token);
 				return funcKey;
 			}
@@ -96,7 +98,7 @@ namespace Soul.Expression
 
 		private static SyntaxTree Watch(string expr)
 		{
-			var tokens = new SyntaxTree();
+			var tokens = new SyntaxTree(expr);
 			Watch(expr, tokens);
 			return tokens;
 		}
