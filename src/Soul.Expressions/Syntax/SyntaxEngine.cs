@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Soul.Expression.Tokens;
+using Soul.Expressions.Tokens;
 
-namespace Soul.Expression
+namespace Soul.Expressions
 {
 	/// <summary>
 	/// 语法分析引擎 
@@ -15,21 +16,20 @@ namespace Soul.Expression
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static SyntaxTree Run(string expr)
+		public static SyntaxTree Run(string expr, SyntaxContext context)
 		{
-			return Watch(expr);
+			var tree = new SyntaxTree(expr, context);
+			return Watch(tree);
 		}
-
 		/// <summary>
 		/// 观察
 		/// </summary>
-		/// <param name="expr"></param>
+		/// <param name="tree"></param>
 		/// <returns></returns>
-		private static SyntaxTree Watch(string expr)
+		private static SyntaxTree Watch(SyntaxTree tree)
 		{
-			var tokens = new SyntaxTree(expr);
-			Watch(expr, tokens);
-			return tokens;
+			Watch(tree.Text, tree);
+			return tree;
 		}
 
 		/// <summary>
@@ -45,20 +45,38 @@ namespace Soul.Expression
 				//处理换元
 				return expr;
 			}
+			if (tree.Context.ContainsParameter(expr))
+			{
+				//处理参数
+				return expr;
+			}
 			if (SyntaxUtility.IsConstant(expr))
 			{
 				//处理常量
 				return expr;
-			}			
-			if (MatchMethodSyntax(expr, out Match methodMatch))
+			}
+			if (MatchObjectMethodSyntax(expr, out Match objectMethodMatch))
 			{
 				//处理函数
-				var name = methodMatch.Groups["name"].Value;
-				var args = methodMatch.Groups["args"].Value;
-				var value = methodMatch.Value;
+				var type = objectMethodMatch.Groups["type"].Value;
+				var name = objectMethodMatch.Groups["name"].Value;
+				var args = objectMethodMatch.Groups["args"].Value;
+				var value = objectMethodMatch.Value;
+				var parameters = SyntaxUtility.SplitParameters(args);
+				var parametersList = parameters.Select(arg => Watch(arg, tree)).ToArray();
+				var token = new MethodSyntaxToken(value, type, name, parametersList, expr);
+				var funcKey = tree.AddToken(token);
+				return funcKey;
+			}
+			if (MatchGlobalMethodSyntax(expr, out Match globalMethodMatch))
+			{
+				//处理函数
+				var name = globalMethodMatch.Groups["name"].Value;
+				var args = globalMethodMatch.Groups["args"].Value;
+				var value = globalMethodMatch.Value;
 				var parameters = SyntaxUtility.SplitParameters(args);
 				var parametersArray = parameters.Select(arg => Watch(arg, tree)).ToArray();
-				var token = new MethodSyntaxToken(value, name, parametersArray, expr);
+				var token = new MethodSyntaxToken(value, null, name, parametersArray, expr);
 				var funcKey = tree.AddToken(token);
 				return funcKey;
 			}
@@ -152,11 +170,6 @@ namespace Soul.Expression
 				Watch(text, tree);
 				return key;
 			}
-			if (SyntaxUtility.IsParameter(expr))
-			{
-				//处理常量
-				return expr;
-			}
 			var message = string.Format("Unrecognized syntax token：“{0}”", expr);
 			throw new NotImplementedException(message);
 		}
@@ -200,16 +213,26 @@ namespace Soul.Expression
 		}
 
 		/// <summary>
-		/// 是否函数表达式
+		/// 是否全局函数
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <param name="match"></param>
 		/// <returns></returns>
-		private static bool MatchMethodSyntax(string expr, out Match match)
+		private static bool MatchGlobalMethodSyntax(string expr, out Match match)
 		{
-			match = Regex.Match(expr, @"(?<name>\w+\.*\w+)\((?<args>[^\(|\)]+)\)");
+			match = Regex.Match(expr, @"(?<name>\w+)\((?<args>[^\(|\)]+)\)");
 			return match.Success;
 		}
-
+		/// <summary>
+		/// 匹配成员函数
+		/// </summary>
+		/// <param name="expr"></param>
+		/// <param name="match"></param>
+		/// <returns></returns>
+		private static bool MatchObjectMethodSyntax(string expr, out Match match)
+		{
+			match = Regex.Match(expr, @"(?<type>\w+)\.(?<name>\w+)\((?<args>[^\(|\)]+)\)");
+			return match.Success;
+		}
 	}
 }

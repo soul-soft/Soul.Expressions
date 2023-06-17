@@ -1,4 +1,4 @@
-﻿namespace Soul.Expression.Tokens
+﻿namespace Soul.Expressions.Tokens
 {
 	public class UnarySyntaxToken : SyntaxToken
 	{

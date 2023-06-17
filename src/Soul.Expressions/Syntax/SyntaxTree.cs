@@ -1,28 +1,31 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using Soul.Expression.Tokens;
+using Soul.Expressions.Tokens;
 
-namespace Soul.Expression
+namespace Soul.Expressions
 {
 	public class SyntaxTree
 	{
 		public string Text { get; }
-		
+
+		public SyntaxContext Context { get; }
+
 		public Dictionary<string, SyntaxToken> _tokens = new Dictionary<string, SyntaxToken>();
 
-		public SyntaxTree(string text)
+		internal SyntaxTree(string text, SyntaxContext context)
 		{
 			Text = text;
+			Context = context;
 		}
 
 		public bool ContainsKey(string key)
 		{
 			return _tokens.ContainsKey(key);
 		}
-		
-		public string Raw 
+
+		public string Raw
 		{
-			get 
+			get
 			{
 				var sb = new StringBuilder();
 				foreach (var token in _tokens)
