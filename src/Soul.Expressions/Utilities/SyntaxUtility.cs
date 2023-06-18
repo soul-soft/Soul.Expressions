@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace Soul.Expressions
+namespace Soul.Expressions.Utilities
 {
 	internal static class SyntaxUtility
 	{
@@ -167,7 +167,7 @@ namespace Soul.Expressions
 						startQuotes = false;
 					}
 				}
-				if ((!startQuotes && item == ','))
+				if (!startQuotes && item == ',')
 				{
 					args.Add(expr.Substring(index, i - index));
 					index = i + 1;
@@ -324,6 +324,12 @@ namespace Soul.Expressions
 				.Where(a => IsMatchMethod(a, arguments))
 				.FirstOrDefault();
 		}
+		/// <summary>
+		/// 匹配函数
+		/// </summary>
+		/// <param name="method"></param>
+		/// <param name="arguments"></param>
+		/// <returns></returns>
 		public static bool IsMatchMethod(MethodInfo method, Type[] arguments)
 		{
 			var parameters = method.GetParameters()
@@ -331,7 +337,7 @@ namespace Soul.Expressions
 				.ToArray();
 			for (int i = 0; i < arguments.Length; i++)
 			{
-				if (parameters[i] != arguments[i] && parameters[i].IsAssignableFrom(arguments[i]))
+				if (parameters[i] != arguments[i] && ReflectionUtility.IsIsAssignableFrom(parameters[i], arguments[i]))
 				{
 					return false;
 				}
