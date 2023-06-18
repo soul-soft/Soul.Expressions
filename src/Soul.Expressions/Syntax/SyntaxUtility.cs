@@ -14,34 +14,39 @@ namespace Soul.Expressions
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static bool TryConstantToken(string expr, out Type token)
+		public static bool TryConstantToken(string expr, out ConstantTokenValueType valueType)
 		{
+			if (expr=="null")
+			{
+				valueType = ConstantTokenValueType.Null;
+				return true;
+			}
 			if (IsIntgerConstantToken(expr))
 			{
-				token = typeof(int);
+				valueType = ConstantTokenValueType.Intger;
 				return true;
 			}
 			if (IsBoolConstantToken(expr))
 			{
-				token = typeof(bool);
+				valueType = ConstantTokenValueType.Boolean;
 				return true;
 			}
 			if (IsDoubleConstantToken(expr))
 			{
-				token = typeof(double);
+				valueType = ConstantTokenValueType.Double;
 				return true;
 			}
 			if (IsStringConstantToken(expr))
 			{
-				token = typeof(string);
+				valueType = ConstantTokenValueType.String;
 				return true;
 			}
 			if (IsCharConstantToken(expr))
 			{
-				token = typeof(char);
+				valueType = ConstantTokenValueType.Char;
 				return true;
 			}
-			token = null;
+			valueType = ConstantTokenValueType.None;
 			return false;
 		}
 		
@@ -138,7 +143,7 @@ namespace Soul.Expressions
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <returns></returns>
-		public static string[] SplitArgumentsToken(string expr)
+		public static string[] SplitTokens(string expr)
 		{
 			var args = new List<string>();
 			var index = 0;
@@ -230,18 +235,30 @@ namespace Soul.Expressions
 			return false;
 		}
 
-
 		/// <summary>
-		/// 匹配函数调用
+		/// 匹配实列函数调用
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <param name="match"></param>
 		/// <returns></returns>
-		public static bool TryMethodCallToken(string expr, out Match match)
+		public static bool TryInstanceMethodCallToken(string expr, out Match match)
 		{
-			match = Regex.Match(expr, @"((?<type>\w+\.)*)(?<name>\w+)\((?<args>[^\(|\)]+)\)");
+			match = Regex.Match(expr, @"(?<instance>\w+)\.(?<name>\w+)\((?<args>[^\(|\)]+)\)");
 			return match.Success;
 		}
+
+		/// <summary>
+		/// 匹配实列函数调用
+		/// </summary>
+		/// <param name="expr"></param>
+		/// <param name="match"></param>
+		/// <returns></returns>
+		public static bool TryStaticMethodCallToken(string expr, out Match match)
+		{
+			match = Regex.Match(expr, @"(?<name>\w+)\((?<args>[^\(|\)]+)\)");
+			return match.Success;
+		}
+		
 		/// <summary>
 		/// 匹配成员访问
 		/// </summary>
@@ -253,6 +270,7 @@ namespace Soul.Expressions
 			math = Regex.Match(expr, @"(?<expr1>([_a-zA-Z]\w*)|(#\{\d+\}))\.(?<expr2>[_a-zA-Z]\w*)");
 			return math.Success;
 		}
+	
 		/// <summary>
 		/// 获取表达式类型
 		/// </summary>

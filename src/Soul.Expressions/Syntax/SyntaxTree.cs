@@ -9,16 +9,16 @@ namespace Soul.Expressions
 	{
 		public string Text { get; }
 
-		private HashSet<SyntaxParameter> _parameters = new HashSet<SyntaxParameter>();
+		private HashSet<Parameter> _parameters = new HashSet<Parameter>();
 
 		private Dictionary<string, SyntaxToken> _tokens = new Dictionary<string, SyntaxToken>();
 
 		public IReadOnlyDictionary<string,SyntaxToken> Tokens => _tokens;
 
-		internal SyntaxTree(string text, SyntaxParameter[] parameters)
+		internal SyntaxTree(string text, Parameter[] parameters)
 		{
 			Text = text;
-			_parameters = new HashSet<SyntaxParameter>(parameters);
+			_parameters = new HashSet<Parameter>(parameters);
 		}
 
 		public bool ContainsToken(string key)
@@ -31,7 +31,7 @@ namespace Soul.Expressions
 			return _parameters.Any(a => a.Name == name);
 		}
 
-		public SyntaxParameter GetParameter(string name)
+		public Parameter GetParameter(string name)
 		{
 			return _parameters.Where(a => a.Name == name).FirstOrDefault();
 		}

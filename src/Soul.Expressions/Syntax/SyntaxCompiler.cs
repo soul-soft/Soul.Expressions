@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -21,7 +20,7 @@ namespace Soul.Expressions
 			}
 		}
 
-		public static LambdaExpression Lambda(string expr, params SyntaxParameter[] parameters)
+		public static LambdaExpression Lambda(string expr, params Parameter[] parameters)
 		{
 			var tree = SyntaxEngine.Run(expr, parameters);
 			return Lambda(tree);
@@ -56,8 +55,9 @@ namespace Soul.Expressions
 
 			if (token is ConstantToken constantToken)
 			{
+				var type = constantToken.ParsedType();
 				var value = constantToken.ParsedValue();
-				return Expression.Constant(value, constantToken.Type);
+				return Expression.Constant(value, type);
 			}
 
 			if (token is UnaryToken unaryToken)
@@ -93,7 +93,7 @@ namespace Soul.Expressions
 				return Expression.MakeBinary(type, left, right);
 			}
 
-			if (token is StaticMethodCallToken methodCallToken)
+			if (token is MethodCallToken methodCallToken)
 			{
 				Methods.TryGetValue(methodCallToken.Method,out MethodInfo method);
 				var parameters = context.GetExpressions(methodCallToken.Arguments);

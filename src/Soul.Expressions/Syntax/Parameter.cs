@@ -2,13 +2,12 @@
 
 namespace Soul.Expressions
 {
-	public class SyntaxParameter
+	public class Parameter
 	{
 		public string Name { get; }
-		public object Value { get; }
 		public Type Type { get; }
 
-		public SyntaxParameter(string name, Type type)
+		public Parameter(string name, Type type)
 		{
 			Name = name;
 			Type = type;
@@ -16,11 +15,11 @@ namespace Soul.Expressions
 
 		public override bool Equals(object obj)
 		{
-			if (!(obj is SyntaxParameter))
+			if (!(obj is Parameter))
 			{
 				return false;
 			}
-			var other = (SyntaxParameter)obj;
+			var other = (Parameter)obj;
 			return other.Name == this.Name;
 		}
 

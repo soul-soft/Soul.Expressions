@@ -5,18 +5,18 @@ namespace Soul.Expressions.Tokens
 	public class ConstantToken : SyntaxToken
 	{
 		public string Value { get; }
-		public Type Type { get; }
+		public ConstantTokenValueType ValueType { get; }
 
-		public ConstantToken(string value, Type type)
+		public ConstantToken(string value, ConstantTokenValueType valueType)
 		{
 			Raw = value;
 			Value = value;
-			Type = type;
+			ValueType = valueType;
 		}
 
 		public object ParsedValue()
 		{
-			if (typeof(string) == Type)
+			if (ConstantTokenValueType.String == ValueType)
 			{
 				if (Value == "\"\"")
 				{
@@ -24,25 +24,56 @@ namespace Soul.Expressions.Tokens
 				}
 				return Value.Substring(1, Value.Length - 2);
 			}
-			if (typeof(char) == Type)
+			if (ConstantTokenValueType.Char == ValueType)
 			{
 				var ch = Value.Substring(1, Value.Length - 2);
 				return Convert.ToChar(ch);
 			}
-			if (typeof(int) == Type)
+			if (ConstantTokenValueType.Intger == ValueType)
 			{
 				return Convert.ToInt32(Value);
 			}
-			if (typeof(double) == Type)
+			if (ConstantTokenValueType.Double == ValueType)
 			{
 				return Convert.ToDouble(Value);
 			}
-			if (typeof(bool) == Type)
+			if (ConstantTokenValueType.Boolean == ValueType)
 			{
 				return Convert.ToBoolean(Value);
 			}
 			return null;
 		}
 
+		public Type ParsedType()
+		{
+			switch (ValueType)
+			{
+				case ConstantTokenValueType.String:
+					return typeof(string);
+				case ConstantTokenValueType.Boolean:
+					return typeof(bool);
+				case ConstantTokenValueType.Char:
+					return typeof(char);
+				case ConstantTokenValueType.Intger:
+					return typeof(int);
+				case ConstantTokenValueType.Double:
+					return typeof(double);
+				case ConstantTokenValueType.None:
+					return typeof(string);
+				default:
+					return null;
+			}
+		}
+	}
+
+	public enum ConstantTokenValueType
+	{ 
+		String,
+		Boolean,
+		Char,
+		Intger,
+		Null,
+		Double,
+		None
 	}
 }
