@@ -1,12 +1,10 @@
-﻿using Soul.Expressions.Syntax;
-
-namespace Soul.Expressions.Test
+﻿namespace Soul.Expressions.Test
 {
 	internal class Program
 	{
 		static void Main(string[] args)
 		{
-			var expr1 = "Pow(2 + 2, 3)";
+			var expr1 = "1+1.2";
 			var expr2 = "1 + 4 / 2 * 5";
 			var expr3 = "1 + 2 > 5 && 2 / 3 > 5";
 			var options = new SyntaxOptions();//编译选项
@@ -27,6 +25,7 @@ namespace Soul.Expressions.Test
 		public static void Test()
 		{
 			var options = new SyntaxOptions();
+			options.RegisterFunction(typeof(GlobalMethods));
 			var compiler = new SyntaxCompiler(options);
 			var tree0 = new SyntaxContext("!flag && 1 > 2", new Parameter("flag", typeof(bool)));
 			var expression0 = compiler.Lambda(tree0);

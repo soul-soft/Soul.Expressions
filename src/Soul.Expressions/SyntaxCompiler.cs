@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
-using Soul.Expressions.Syntax;
+using Soul.Expressions.Utilities;
 
 namespace Soul.Expressions
 {
@@ -117,6 +117,17 @@ namespace Soul.Expressions
 				var left = Watch(expr1, context);
 				var right = Watch(expr3, context);
 				var type = SyntaxUtility.GetExpressionType(expr2);
+				if (left.Type != right.Type)
+				{
+					if (ReflectionUtility.IsIsAssignableFrom(left.Type, right.Type))
+					{
+						right = Expression.Convert(right, left.Type);
+					}
+					else
+					{
+						left = Expression.Convert(left, right.Type);
+					}
+				}
 				var key = context.AddToken(Expression.MakeBinary(type, left, right));
 				var value = binaryMatch.Value;
 				var newToken = token.Replace(value, key);
@@ -125,5 +136,6 @@ namespace Soul.Expressions
 			var message = string.Format("Unrecognized syntax token：“{0}”", token);
 			throw new NotImplementedException(message);
 		}
+
 	}
 }
