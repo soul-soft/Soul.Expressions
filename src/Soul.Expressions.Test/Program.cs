@@ -11,8 +11,7 @@ namespace Soul.Expressions.Test
 	{
 		static void Main(string[] args)
 		{
-			Expression<Func<string, bool>> expr = s => string.IsNullOrEmpty(s);
-			var syntax = SyntaxEngine.Run("string.IsNullOrEmpty(p.Name)", new Parameter("p", typeof(C)));
+			var syntax = SyntaxEngine.Run("p.Name.ToUpper()", new Parameter("p", typeof(C)));
 			Console.WriteLine(syntax.Debug);
 			SyntaxCompiler.RegisterStaticMethods(typeof(Funcs));
 			var expression = SyntaxCompiler.Lambda(syntax);

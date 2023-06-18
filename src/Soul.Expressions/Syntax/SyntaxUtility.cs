@@ -243,7 +243,7 @@ namespace Soul.Expressions
 		/// <returns></returns>
 		public static bool TryInstanceMethodCallToken(string expr, out Match match)
 		{
-			match = Regex.Match(expr, @"(?<instance>\w+)\.(?<name>\w+)\((?<args>[^\(|\)]+)\)");
+			match = Regex.Match(expr, @"(?<instance>\w+)\.(?<name>\w+)\((?<args>[^\(|\)]*)\)");
 			return match.Success;
 		}
 
@@ -255,7 +255,7 @@ namespace Soul.Expressions
 		/// <returns></returns>
 		public static bool TryStaticMethodCallToken(string expr, out Match match)
 		{
-			match = Regex.Match(expr, @"(?<name>\w+)\((?<args>[^\(|\)]+)\)");
+			match = Regex.Match(expr, @"(?<name>\w+)\((?<args>[^\(|\)]*)\)");
 			return match.Success;
 		}
 		

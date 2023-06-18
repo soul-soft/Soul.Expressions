@@ -59,6 +59,18 @@ namespace Soul.Expressions
 				var token = new ConstantToken(expr, valueType);
 				return tree.AddToken(token);
 			}
+			//处理成员访问
+			if (SyntaxUtility.TryMemberAccessToken(expr, out Match memberAccessMatch))
+			{
+				var expr1 = memberAccessMatch.Groups["expr1"].Value;
+				var expr2 = memberAccessMatch.Groups["expr2"].Value;
+				var value = memberAccessMatch.Value;
+				var key1 = Watch(expr1, tree);
+				var token = new MemberToken(key1, expr2);
+				var key = tree.AddToken(token);
+				var newExpr = expr.Replace(value, key);
+				return Watch(newExpr, tree);
+			}
 			//处理实列函数
 			if (SyntaxUtility.TryInstanceMethodCallToken(expr, out Match instanceMethodCallMatch))
 			{
@@ -103,18 +115,6 @@ namespace Soul.Expressions
 				var expr1 = includeMatch.Groups["expr"].Value;
 				var value = includeMatch.Value;
 				var key = Watch(expr1, tree);
-				var newExpr = expr.Replace(value, key);
-				return Watch(newExpr, tree);
-			}
-			//处理成员访问
-			if (SyntaxUtility.TryMemberAccessToken(expr, out Match memberAccessMatch))
-			{
-				var expr1 = memberAccessMatch.Groups["expr1"].Value;
-				var expr2 = memberAccessMatch.Groups["expr2"].Value;
-				var value = memberAccessMatch.Value;
-				var key1 = Watch(expr1, tree);
-				var token = new MemberToken(key1, expr2);
-				var key = tree.AddToken(token);
 				var newExpr = expr.Replace(value, key);
 				return Watch(newExpr, tree);
 			}
