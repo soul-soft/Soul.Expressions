@@ -3,21 +3,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using Soul.Expressions.Syntax;
 
 namespace Soul.Expressions
 {
 	/// <summary>
 	/// 语法分析引擎 
 	/// </summary>
-	public static class ExpressionSyntax
+	public class SyntaxCompiler
 	{
-		public static LambdaExpression Lambda(ExpressionSyntaxContext context)
+		public SyntaxOptions Options { get; }
+
+		public SyntaxCompiler()
+			: this(new SyntaxOptions())
+		{
+
+		}
+
+		public SyntaxCompiler(SyntaxOptions options)
+		{
+			Options = options;
+		}
+
+		public LambdaExpression Lambda(SyntaxContext context)
 		{
 			var body = Watch(context.Expression, context);
 			return Expression.Lambda(body, context.Parameters);
 		}
 
-		private static Expression Watch(string token, ExpressionSyntaxContext context)
+		private Expression Watch(string token, SyntaxContext context)
 		{
 			if (context.TryGetToken(token, out Expression tokenExpression))
 			{
@@ -26,62 +40,54 @@ namespace Soul.Expressions
 			//处理参数
 			if (context.TryGetParameter(token, out ParameterExpression parameterExpression))
 			{
+				context.AddToken(parameterExpression);
 				return parameterExpression;
 			}
 			//处理常量
 			if (SyntaxUtility.TryConstantToken(token, out ConstantExpression constantExpression))
 			{
+				context.AddToken(constantExpression);
 				return constantExpression;
 			}
 			//处理成员访问
 			if (SyntaxUtility.TryMemberAccessToken(token, out Match memberAccessMatch))
 			{
-				var value = memberAccessMatch.Value;
 				var owner = memberAccessMatch.Groups["owner"].Value;
-				var member = memberAccessMatch.Groups["member"].Value;
+				var memberName = memberAccessMatch.Groups["member"].Value;
 				var ownerExpression = Watch(owner, context);
-				var key = context.AddToken(ownerExpression);
+				var member = ownerExpression.Type.GetProperty(memberName);
+				if (member == null)
+				{
+					throw new MemberAccessException(token);
+				}
+				var key = context.AddToken(Expression.MakeMemberAccess(ownerExpression, member));
+				var value = memberAccessMatch.Value;
 				var newToken = token.Replace(value, key);
 				return Watch(newToken, context);
 			}
-			////处理实列函数
-			//if (SyntaxUtility.TryInstanceMethodCallToken(token, out Match instanceMethodCallMatch))
-			//{
-			//	var instance = instanceMethodCallMatch.Groups["instance"].Value;
-			//	var name = instanceMethodCallMatch.Groups["name"].Value;
-			//	var argsExpr = instanceMethodCallMatch.Groups["args"].Value;
-			//	var value = instanceMethodCallMatch.Value;
-			//	var args = SyntaxUtility.SplitTokens(argsExpr);
-			//	var parameters = new List<string>();
-			//	foreach (var item in args)
-			//	{
-			//		var argKey = Watch(item, tree);
-			//		parameters.Add(argKey);
-			//	}
-			//	var instanceKey = Watch(instance, tree);
-			//	var token = new MethodCallToken(instanceKey, name, parameters.ToArray());
-			//	var key = tree.AddToken(token);
-			//	var newExpr = token.Replace(value, key);
-			//	return Watch(newExpr, tree);
-			//}
-			////处理静态函数
-			//if (SyntaxUtility.TryStaticMethodCallToken(token, out Match staticMethodCallMatch))
-			//{
-			//	var name = staticMethodCallMatch.Groups["name"].Value;
-			//	var argsExpr = staticMethodCallMatch.Groups["args"].Value;
-			//	var value = staticMethodCallMatch.Value;
-			//	var args = SyntaxUtility.SplitTokens(argsExpr);
-			//	var parameters = new List<string>();
-			//	foreach (var item in args)
-			//	{
-			//		var argKey = Watch(item, tree);
-			//		parameters.Add(argKey);
-			//	}
-			//	var token = new MethodCallToken(name, parameters.ToArray());
-			//	var key = tree.AddToken(token);
-			//	var newExpr = token.Replace(value, key);
-			//	return Watch(newExpr, tree);
-			//}
+			//处理静态函数
+			if (SyntaxUtility.TryStaticMethodCallToken(token, out Match staticMethodCallMatch))
+			{
+				var name = staticMethodCallMatch.Groups["name"].Value;
+				var argsExpr = staticMethodCallMatch.Groups["args"].Value;
+				var value = staticMethodCallMatch.Value;
+				var arguments = new List<Expression>();
+				var argumentTokens = SyntaxUtility.SplitTokens(argsExpr);
+				foreach (var item in argumentTokens)
+				{
+					var argument = Watch(item, context);
+					arguments.Add(argument);
+				}
+				var argumentTypes = arguments.Select(s => s.Type).ToArray();
+				var method = SyntaxUtility.MatchMethod(name, argumentTypes, Options.GlobalFunctions.ToArray());
+				if (method == null)
+				{
+					throw new MissingMethodException(token);
+				}
+				var key = context.AddToken(Expression.Call(null, method, arguments));
+				var newExpr = token.Replace(value, key);
+				return Watch(newExpr, context);
+			}
 			//处理括号
 			if (SyntaxUtility.TryIncludeToken(token, out Match includeMatch))
 			{
@@ -95,10 +101,10 @@ namespace Soul.Expressions
 			//处理逻辑非
 			if (SyntaxUtility.TryNotUnaryToken(token, out Match unaryMatch))
 			{
-				var value = unaryMatch.Value;
 				var expr = unaryMatch.Groups["expr"].Value;
 				var operand = Watch(expr, context);
 				var key = context.AddToken(Expression.MakeUnary(ExpressionType.Not, operand, null));
+				var value = unaryMatch.Value;
 				var newToken = token.Replace(value, key);
 				return Watch(newToken, context);
 			}

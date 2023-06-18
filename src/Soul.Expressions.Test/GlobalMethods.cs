@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Soul.Expressions.Test
 {
-	public static class Funcs
+	public static class GlobalMethods
 	{
 		public static double Pow(int a,int b)
 		{ 
