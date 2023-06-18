@@ -250,7 +250,7 @@ namespace Soul.Expressions
 		/// <returns></returns>
 		public static bool TryMemberAccessToken(string expr,out Match math)
 		{
-			math = Regex.Match(expr, @"(?<expr1>[_a-zA-Z]\w*)\.(?<expr2>[_a-zA-Z]\w*)");
+			math = Regex.Match(expr, @"(?<expr1>([_a-zA-Z]\w*)|(#\{\d+\}))\.(?<expr2>[_a-zA-Z]\w*)");
 			return math.Success;
 		}
 		/// <summary>

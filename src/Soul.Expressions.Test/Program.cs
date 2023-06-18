@@ -4,19 +4,24 @@ namespace Soul.Expressions.Test
 {
 	public class P
 	{
-		public int Age;
+		public C Age;
 	}
+	public class C
+	{
+		public string Name { get; set; }
+	}
+
 	internal class Program
 	{
 		static void Main(string[] args)
 		{
-			Expression<Func<P, int>> expr = p => p.Age;
+			Expression<Func<P, string>> expr = p => p.Age.Name;
 
-			var syntax = SyntaxEngine.Run("p.Age", new SyntaxParameter("p", typeof(P)));
+			var syntax = SyntaxEngine.Run("p.Age.Name", new SyntaxParameter("p", typeof(P)));
 			SyntaxCompiler.RegisterStaticMethods(typeof(Funcs));
 			var expression = SyntaxCompiler.Lambda(syntax);
 			var func = expression.Compile();
-			Console.WriteLine(func.DynamicInvoke(new P { Age = 20 }));
+			Console.WriteLine(func.DynamicInvoke(new P { Age = new C { Name = "aa"} }));
 			Test();
 		}
 
