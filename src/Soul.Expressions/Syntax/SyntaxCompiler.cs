@@ -2,104 +2,128 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using Soul.Expressions.Tokens;
+using System.Text.RegularExpressions;
+using Soul.Expressions.Syntax;
 
 namespace Soul.Expressions
 {
-	public static class SyntaxCompiler
+	/// <summary>
+	/// 语法分析引擎 
+	/// </summary>
+	public class SyntaxCompiler
 	{
-		public static Dictionary<string, MethodInfo> Methods = new Dictionary<string, MethodInfo>();
+		public SyntaxOptions Options { get; }
 
-		public static void RegisterStaticMethods(Type type)
+		public SyntaxCompiler()
+			: this(new SyntaxOptions())
 		{
-			var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public);
-			foreach (var item in methods)
-			{
-				Methods.Add(item.Name,item);
-			}
+
 		}
 
-		public static LambdaExpression Lambda(string expr, params Parameter[] parameters)
+		public SyntaxCompiler(SyntaxOptions options)
 		{
-			var tree = SyntaxEngine.Run(expr, parameters);
-			return Lambda(tree);
+			Options = options;
 		}
 
-		public static LambdaExpression Lambda(SyntaxTree tree)
+		public LambdaExpression Lambda(SyntaxContext context)
 		{
-			var context = new SyntaxCompilerContext(tree);
-			foreach (var item in tree.Tokens)
-			{
-				var expression = Watch(item.Value, context);
-				context.AddExpression(item.Key, expression);
-			}
-			var body = context.GetBody();
-			var parameters = context.GetParameters();
-			return Expression.Lambda(body, parameters);
+			var body = Watch(context.Expression, context);
+			return Expression.Lambda(body, context.Parameters);
 		}
 
-		private static Expression Watch(SyntaxToken token, SyntaxCompilerContext context)
+		private Expression Watch(string token, SyntaxContext context)
 		{
-			if (token is ParameterToken parameterToken)
+			if (context.TryGetToken(token, out Expression tokenExpression))
 			{
-				return Expression.Parameter(parameterToken.Type, parameterToken.Name);
+				return tokenExpression;
 			}
-
-			if (token is MemberToken memberToken)
+			//处理参数
+			if (context.TryGetParameter(token, out ParameterExpression parameterExpression))
 			{
-				var expression = context.GetExpression(memberToken.Expression);
-				var member = expression.Type.GetMember(memberToken.Member).First();
-				return Expression.MakeMemberAccess(expression, member);
+				context.AddToken(parameterExpression);
+				return parameterExpression;
 			}
-
-			if (token is ConstantToken constantToken)
+			//处理常量
+			if (SyntaxUtility.TryConstantToken(token, out ConstantExpression constantExpression))
 			{
-				var type = constantToken.ParsedType();
-				var value = constantToken.ParsedValue();
-				return Expression.Constant(value, type);
+				context.AddToken(constantExpression);
+				return constantExpression;
 			}
-
-			if (token is UnaryToken unaryToken)
+			//处理成员访问
+			if (SyntaxUtility.TryMemberAccessToken(token, out Match memberAccessMatch))
 			{
-				if (unaryToken.Type == "!")
+				var owner = memberAccessMatch.Groups["owner"].Value;
+				var memberName = memberAccessMatch.Groups["member"].Value;
+				var ownerExpression = Watch(owner, context);
+				var member = ownerExpression.Type.GetProperty(memberName);
+				if (member == null)
 				{
-					var expression = context.GetExpression(unaryToken.Operand);
-					return Expression.MakeUnary(ExpressionType.Not, expression, null);
+					throw new MemberAccessException(token);
 				}
-				else
-				{
-					var message = string.Format("Unrecognized syntax token：“{0}”", unaryToken.Raw);
-					throw new NotImplementedException(message);
-				}
+				var key = context.AddToken(Expression.MakeMemberAccess(ownerExpression, member));
+				var value = memberAccessMatch.Value;
+				var newToken = token.Replace(value, key);
+				return Watch(newToken, context);
 			}
-
-			if (token is BinaryToken binaryExpression)
+			//处理静态函数
+			if (SyntaxUtility.TryStaticMethodCallToken(token, out Match staticMethodCallMatch))
 			{
-				var type = SyntaxUtility.GetExpressionType(binaryExpression.BinaryType);
-				var left = context.GetExpression(binaryExpression.Left);
-				var right = context.GetExpression(binaryExpression.Right);
-				if (left.Type == typeof(double) || right.Type == typeof(double))
+				var name = staticMethodCallMatch.Groups["name"].Value;
+				var argsExpr = staticMethodCallMatch.Groups["args"].Value;
+				var value = staticMethodCallMatch.Value;
+				var arguments = new List<Expression>();
+				var argumentTokens = SyntaxUtility.SplitTokens(argsExpr);
+				foreach (var item in argumentTokens)
 				{
-					if (left.Type != typeof(double))
-					{
-						left = Expression.Convert(left, typeof(double));
-					}
-					else
-					{
-						right = Expression.Convert(right, typeof(double));
-					}
+					var argument = Watch(item, context);
+					arguments.Add(argument);
 				}
-				return Expression.MakeBinary(type, left, right);
+				var argumentTypes = arguments.Select(s => s.Type).ToArray();
+				var method = SyntaxUtility.MatchMethod(name, argumentTypes, Options.GlobalFunctions.ToArray());
+				if (method == null)
+				{
+					throw new MissingMethodException(token);
+				}
+				var key = context.AddToken(Expression.Call(null, method, arguments));
+				var newExpr = token.Replace(value, key);
+				return Watch(newExpr, context);
 			}
-
-			if (token is MethodCallToken methodCallToken)
+			//处理括号
+			if (SyntaxUtility.TryIncludeToken(token, out Match includeMatch))
 			{
-				Methods.TryGetValue(methodCallToken.Method,out MethodInfo method);
-				var parameters = context.GetExpressions(methodCallToken.Arguments);
-				return Expression.Call(method, parameters);
+				var value = includeMatch.Value;
+				var expr = includeMatch.Groups["expr"].Value;
+				var expression = Watch(expr, context);
+				var key = context.AddToken(expression);
+				var newToken = token.Replace(value, key);
+				return Watch(newToken, context);
 			}
-			return null;
+			//处理逻辑非
+			if (SyntaxUtility.TryNotUnaryToken(token, out Match unaryMatch))
+			{
+				var expr = unaryMatch.Groups["expr"].Value;
+				var operand = Watch(expr, context);
+				var key = context.AddToken(Expression.MakeUnary(ExpressionType.Not, operand, null));
+				var value = unaryMatch.Value;
+				var newToken = token.Replace(value, key);
+				return Watch(newToken, context);
+			}
+			//处理二元运算
+			if (SyntaxUtility.TryBinaryToken(token, out Match binaryMatch))
+			{
+				var expr1 = binaryMatch.Groups["expr1"].Value;
+				var expr2 = binaryMatch.Groups["expr2"].Value;
+				var expr3 = binaryMatch.Groups["expr3"].Value;
+				var left = Watch(expr1, context);
+				var right = Watch(expr3, context);
+				var type = SyntaxUtility.GetExpressionType(expr2);
+				var key = context.AddToken(Expression.MakeBinary(type, left, right));
+				var value = binaryMatch.Value;
+				var newToken = token.Replace(value, key);
+				return Watch(newToken, context);
+			}
+			var message = string.Format("Unrecognized syntax token：“{0}”", token);
+			throw new NotImplementedException(message);
 		}
 	}
 }

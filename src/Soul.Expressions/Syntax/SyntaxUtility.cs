@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.RegularExpressions;
-using Soul.Expressions.Tokens;
 
 namespace Soul.Expressions
 {
@@ -12,44 +12,44 @@ namespace Soul.Expressions
 		/// <summary>
 		/// 是否为常量
 		/// </summary>
-		/// <param name="expr"></param>
+		/// <param name="token"></param>
 		/// <returns></returns>
-		public static bool TryConstantToken(string expr, out ConstantTokenValueType valueType)
+		public static bool TryConstantToken(string token, out ConstantExpression constantExpression)
 		{
-			if (expr=="null")
+			if (token == "null")
 			{
-				valueType = ConstantTokenValueType.Null;
+				constantExpression = Expression.Constant(null);
 				return true;
 			}
-			if (IsIntgerConstantToken(expr))
+			if (IsIntgerConstantToken(token))
 			{
-				valueType = ConstantTokenValueType.Intger;
+				constantExpression = Expression.Constant(Convert.ToInt32(token));
 				return true;
 			}
-			if (IsBoolConstantToken(expr))
+			if (IsBoolConstantToken(token))
 			{
-				valueType = ConstantTokenValueType.Boolean;
+				constantExpression = Expression.Constant(Convert.ToBoolean(token));
 				return true;
 			}
-			if (IsDoubleConstantToken(expr))
+			if (IsDoubleConstantToken(token))
 			{
-				valueType = ConstantTokenValueType.Double;
+				constantExpression = Expression.Constant(Convert.ToDouble(token));
 				return true;
 			}
-			if (IsStringConstantToken(expr))
+			if (IsStringConstantToken(token))
 			{
-				valueType = ConstantTokenValueType.String;
+				constantExpression = Expression.Constant(Convert.ToString(token));
 				return true;
 			}
-			if (IsCharConstantToken(expr))
+			if (IsCharConstantToken(token))
 			{
-				valueType = ConstantTokenValueType.Char;
+				constantExpression = Expression.Constant(Convert.ToChar(token));
 				return true;
 			}
-			valueType = ConstantTokenValueType.None;
+			constantExpression = null;
 			return false;
 		}
-		
+
 		/// <summary>
 		/// 是否为字符串常量
 		/// </summary>
@@ -72,7 +72,7 @@ namespace Soul.Expressions
 			}
 			return true;
 		}
-		
+
 		/// <summary>
 		/// 是否为字符串
 		/// </summary>
@@ -99,7 +99,7 @@ namespace Soul.Expressions
 			}
 			return true;
 		}
-		
+
 		/// <summary>
 		/// 是否为整数
 		/// </summary>
@@ -109,7 +109,7 @@ namespace Soul.Expressions
 		{
 			return Regex.IsMatch(expr, @"^\d+$");
 		}
-		
+
 		/// <summary>
 		/// 是否为浮点数
 		/// </summary>
@@ -119,7 +119,7 @@ namespace Soul.Expressions
 		{
 			return Regex.IsMatch(expr, @"^\d+\.\d+$");
 		}
-		
+
 		/// <summary>
 		/// 是否为布尔值
 		/// </summary>
@@ -137,7 +137,7 @@ namespace Soul.Expressions
 			}
 			return false;
 		}
-		
+
 		/// <summary>
 		/// 分割函数参数
 		/// </summary>
@@ -198,9 +198,9 @@ namespace Soul.Expressions
 		/// <param name="expr"></param>
 		/// <param name="match"></param>
 		/// <returns></returns>
-		public static bool TryUnaryToken(string expr, out Match match)
+		public static bool TryNotUnaryToken(string expr, out Match match)
 		{
-			match = Regex.Match(expr, @"\!(?<expr1>\w+|\w+\.\w+|#\{\d+\})");
+			match = Regex.Match(expr, @"\!(?<expr>\w+|\w+\.\w+|#\{\d+\})");
 			return match.Success;
 		}
 
@@ -258,19 +258,19 @@ namespace Soul.Expressions
 			match = Regex.Match(expr, @"(?<name>\w+)\((?<args>[^\(|\)]*)\)");
 			return match.Success;
 		}
-		
+
 		/// <summary>
 		/// 匹配成员访问
 		/// </summary>
 		/// <param name="expr"></param>
 		/// <param name="math"></param>
 		/// <returns></returns>
-		public static bool TryMemberAccessToken(string expr,out Match math)
+		public static bool TryMemberAccessToken(string expr, out Match math)
 		{
-			math = Regex.Match(expr, @"(?<expr1>([_a-zA-Z]\w*)|(#\{\d+\}))\.(?<expr2>[_a-zA-Z]\w*)");
+			math = Regex.Match(expr, @"(?<owner>([_a-zA-Z]\w*)|(#\{\d+\}))\.(?<member>[_a-zA-Z]\w*)");
 			return math.Success;
 		}
-	
+
 		/// <summary>
 		/// 获取表达式类型
 		/// </summary>
@@ -311,6 +311,32 @@ namespace Soul.Expressions
 					return ExpressionType.Not;
 			}
 			throw new InvalidOperationException();
+		}
+
+		/// <summary>
+		/// 匹配函数
+		/// </summary>
+		/// <returns></returns>
+		public static MethodInfo MatchMethod(string name, Type[] arguments, MethodInfo[] methods)
+		{
+			return methods.Where(a => a.Name == name)
+				.Where(a => a.GetParameters().Length == arguments.Length)
+				.Where(a => IsMatchMethod(a, arguments))
+				.FirstOrDefault();
+		}
+		public static bool IsMatchMethod(MethodInfo method, Type[] arguments)
+		{
+			var parameters = method.GetParameters()
+				.Select(a => a.ParameterType)
+				.ToArray();
+			for (int i = 0; i < arguments.Length; i++)
+			{
+				if (parameters[i] != arguments[i] && parameters[i].IsAssignableFrom(arguments[i]))
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 }
