@@ -316,17 +316,6 @@ namespace Soul.Expressions.Utilities
 		/// <summary>
 		/// 匹配函数
 		/// </summary>
-		/// <returns></returns>
-		public static MethodInfo MatchMethod(string name, Type[] arguments, MethodInfo[] methods)
-		{
-			return methods.Where(a => a.Name == name)
-				.Where(a => a.GetParameters().Length == arguments.Length)
-				.Where(a => IsMatchMethod(a, arguments))
-				.FirstOrDefault();
-		}
-		/// <summary>
-		/// 匹配函数
-		/// </summary>
 		/// <param name="method"></param>
 		/// <param name="arguments"></param>
 		/// <returns></returns>
@@ -335,14 +324,20 @@ namespace Soul.Expressions.Utilities
 			var parameters = method.GetParameters()
 				.Select(a => a.ParameterType)
 				.ToArray();
+			var flag = true;
 			for (int i = 0; i < arguments.Length; i++)
 			{
-				if (parameters[i] != arguments[i] && ReflectionUtility.IsIsAssignableFrom(parameters[i], arguments[i]))
+				if (parameters[i] == arguments[i])
 				{
-					return false;
+                    continue;
 				}
+				if (ReflectionUtility.IsIsAssignableFrom(parameters[i], arguments[i]))
+				{
+					continue;
+                }
+				flag = false;
 			}
-			return true;
+			return flag;
 		}
 	}
 }

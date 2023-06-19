@@ -6,7 +6,7 @@ namespace Soul.Expressions
 {
     public class SyntaxOptions
     {
-        public List<MethodInfo> GlobalFunctions { get; } = new List<MethodInfo>();
+        public List<MethodInfo> Functions { get; } = new List<MethodInfo>();
 
         public SyntaxOptions()
         {
@@ -15,7 +15,7 @@ namespace Soul.Expressions
 
         public void RegisterFunction(MethodInfo method)
         {
-            GlobalFunctions.Add(method);
+            Functions.Add(method);
         }
 
         public void RegisterFunction(Type type)
