@@ -26,7 +26,7 @@ namespace Soul.Expressions.Utilities
 				constantExpression = Expression.Constant(Convert.ToInt32(token));
 				return true;
 			}
-			if (IsBoolConstantToken(token))
+			if (IsBooleanConstantToken(token))
 			{
 				constantExpression = Expression.Constant(Convert.ToBoolean(token));
 				return true;
@@ -53,15 +53,15 @@ namespace Soul.Expressions.Utilities
 		/// <summary>
 		/// 是否为字符串常量
 		/// </summary>
-		/// <param name="expr"></param>
+		/// <param name="token"></param>
 		/// <returns></returns>
-		public static bool IsStringConstantToken(string expr)
+		public static bool IsStringConstantToken(string token)
 		{
-			if (expr.Length < 2)
+			if (token.Length < 2)
 			{
 				return false;
 			}
-			var text = Regex.Replace(expr, @"\\.{1}", "#");
+			var text = Regex.Replace(token, @"\\.{1}", "#");
 			if (!text.StartsWith("\"") || !text.EndsWith("\""))
 			{
 				return false;
@@ -76,15 +76,15 @@ namespace Soul.Expressions.Utilities
 		/// <summary>
 		/// 是否为字符串
 		/// </summary>
-		/// <param name="expr"></param>
+		/// <param name="token"></param>
 		/// <returns></returns>
-		public static bool IsCharConstantToken(string expr)
+		public static bool IsCharConstantToken(string token)
 		{
-			if (expr.Length < 3)
+			if (token.Length < 3)
 			{
 				return false;
 			}
-			var text = Regex.Replace(expr, @"\\.{1}", "#");
+			var text = Regex.Replace(token, @"\\.{1}", "#");
 			if (!text.StartsWith("'") || !text.EndsWith("'"))
 			{
 				return false;
@@ -103,35 +103,35 @@ namespace Soul.Expressions.Utilities
 		/// <summary>
 		/// 是否为整数
 		/// </summary>
-		/// <param name="expr"></param>
+		/// <param name="token"></param>
 		/// <returns></returns>
-		public static bool IsIntgerConstantToken(string expr)
+		public static bool IsIntgerConstantToken(string token)
 		{
-			return Regex.IsMatch(expr, @"^\d+$");
+			return Regex.IsMatch(token, @"^\d+$");
 		}
 
 		/// <summary>
 		/// 是否为浮点数
 		/// </summary>
-		/// <param name="expr"></param>
+		/// <param name="token"></param>
 		/// <returns></returns>
-		public static bool IsDoubleConstantToken(string expr)
+		public static bool IsDoubleConstantToken(string token)
 		{
-			return Regex.IsMatch(expr, @"^\d+\.\d+$");
+			return Regex.IsMatch(token, @"^\d+\.\d+$");
 		}
 
 		/// <summary>
 		/// 是否为布尔值
 		/// </summary>
-		/// <param name="expr"></param>
+		/// <param name="token"></param>
 		/// <returns></returns>
-		public static bool IsBoolConstantToken(string expr)
+		public static bool IsBooleanConstantToken(string token)
 		{
-			if (expr == "true")
+			if (token == "true")
 			{
 				return true;
 			}
-			if (expr == "false")
+			if (token == "false")
 			{
 				return true;
 			}
@@ -141,9 +141,9 @@ namespace Soul.Expressions.Utilities
 		/// <summary>
 		/// 分割函数参数
 		/// </summary>
-		/// <param name="expr"></param>
+		/// <param name="token"></param>
 		/// <returns></returns>
-		public static string[] SplitTokens(string expr)
+		public static string[] SplitArgumentTokens(string token)
 		{
 			var args = new List<string>();
 			var index = 0;
@@ -152,9 +152,9 @@ namespace Soul.Expressions.Utilities
 				'"', '\''
 			};
 			var startQuotes = false;
-			for (int i = 0; i < expr.Length; i++)
+			for (int i = 0; i < token.Length; i++)
 			{
-				var item = expr[i];
+				var item = token[i];
 				if (quotes.Contains(item))
 				{
 					if (!startQuotes)
@@ -162,19 +162,19 @@ namespace Soul.Expressions.Utilities
 						index = i;
 						startQuotes = true;
 					}
-					else if (i > 0 && expr[i - 1] != '\\')
+					else if (i > 0 && token[i - 1] != '\\')
 					{
 						startQuotes = false;
 					}
 				}
 				if (!startQuotes && item == ',')
 				{
-					args.Add(expr.Substring(index, i - index));
+					args.Add(token.Substring(index, i - index));
 					index = i + 1;
 				}
-				if (i == expr.Length - 1)
+				if (i == token.Length - 1)
 				{
-					args.Add(expr.Substring(index, i - index + 1));
+					args.Add(token.Substring(index, i - index + 1));
 				}
 			}
 			return args.Select(s => s.Trim()).ToArray();
@@ -183,35 +183,34 @@ namespace Soul.Expressions.Utilities
 		/// <summary>
 		/// 处理括号运算
 		/// </summary>
-		/// <param name="expr"></param>
+		/// <param name="token"></param>
 		/// <param name="match"></param>
 		/// <returns></returns>
-		public static bool TryIncludeToken(string expr, out Match match)
+		public static bool TryIncludeToken(string token, out Match match)
 		{
-			match = Regex.Match(expr, @"\((?<expr>.+)\)");
+			match = Regex.Match(token, @"\((?<expr>.+)\)");
 			return match.Success;
 		}
 
 		/// <summary>
 		/// 处理逻辑非
 		/// </summary>
-		/// <param name="expr"></param>
+		/// <param name="token"></param>
 		/// <param name="match"></param>
 		/// <returns></returns>
-		public static bool TryNotUnaryToken(string expr, out Match match)
+		public static bool TryNotUnaryToken(string token, out Match match)
 		{
-			match = Regex.Match(expr, @"\!(?<expr>\w+|\w+\.\w+|#\{\d+\})");
+			match = Regex.Match(token, @"\!(?<expr>\w+|\w+\.\w+|#\{\d+\})");
 			return match.Success;
 		}
 
 		/// <summary>
 		/// 二元运算
 		/// </summary>
-		/// <param name="expr"></param>
+		/// <param name="token"></param>
 		/// <param name="math"></param>
-		/// <param name="args"></param>
 		/// <returns></returns>
-		public static bool TryBinaryToken(string expr, out Match math)
+		public static bool TryBinaryToken(string token, out Match math)
 		{
 			var args = new List<string>
 			{
@@ -225,7 +224,7 @@ namespace Soul.Expressions.Utilities
 			foreach (var item in args)
 			{
 				var pattern = $@"(?<expr1>[^\s|\*|/|%|\+|\-|>|<|=||&|\|]+)\s*(?<expr2>({item}))\s*(?<expr3>[^\s|\*|/|%|\+|\-|>|<|=||&|\|]+)";
-				math = Regex.Match(expr, pattern);
+				math = Regex.Match(token, pattern);
 				if (math.Success)
 				{
 					return true;
@@ -238,36 +237,36 @@ namespace Soul.Expressions.Utilities
 		/// <summary>
 		/// 匹配实列函数调用
 		/// </summary>
-		/// <param name="expr"></param>
+		/// <param name="token"></param>
 		/// <param name="match"></param>
 		/// <returns></returns>
-		public static bool TryInstanceMethodCallToken(string expr, out Match match)
+		public static bool TryInstanceMethodCallToken(string token, out Match match)
 		{
-			match = Regex.Match(expr, @"(?<instance>\w+)\.(?<name>\w+)\((?<args>[^\(|\)]*)\)");
+			match = Regex.Match(token, @"(?<instance>\w+)\.(?<name>\w+)\((?<args>[^\(|\)]*)\)");
 			return match.Success;
 		}
 
 		/// <summary>
 		/// 匹配实列函数调用
 		/// </summary>
-		/// <param name="expr"></param>
+		/// <param name="token"></param>
 		/// <param name="match"></param>
 		/// <returns></returns>
-		public static bool TryStaticMethodCallToken(string expr, out Match match)
+		public static bool TryStaticMethodCallToken(string token, out Match match)
 		{
-			match = Regex.Match(expr, @"(?<name>\w+)\((?<args>[^\(|\)]*)\)");
+			match = Regex.Match(token, @"(?<name>\w+)\((?<args>[^\(|\)]*)\)");
 			return match.Success;
 		}
 
 		/// <summary>
 		/// 匹配成员访问
 		/// </summary>
-		/// <param name="expr"></param>
+		/// <param name="token"></param>
 		/// <param name="math"></param>
 		/// <returns></returns>
-		public static bool TryMemberAccessToken(string expr, out Match math)
+		public static bool TryMemberAccessToken(string token, out Match math)
 		{
-			math = Regex.Match(expr, @"(?<owner>([_a-zA-Z]\w*)|(#\{\d+\}))\.(?<member>[_a-zA-Z]\w*)");
+			math = Regex.Match(token, @"(?<owner>([_a-zA-Z]\w*)|(#\{\d+\}))\.(?<member>[_a-zA-Z]\w*)");
 			return math.Success;
 		}
 
@@ -310,34 +309,7 @@ namespace Soul.Expressions.Utilities
 				case "!":
 					return ExpressionType.Not;
 			}
-			throw new InvalidOperationException();
+			throw new NotImplementedException(token);
 		}
-
-		/// <summary>
-		/// 匹配函数
-		/// </summary>
-		/// <param name="method"></param>
-		/// <param name="arguments"></param>
-		/// <returns></returns>
-		public static bool IsMatchMethod(MethodInfo method, Type[] arguments)
-		{
-			var parameters = method.GetParameters()
-				.Select(a => a.ParameterType)
-				.ToArray();
-			var flag = true;
-			for (int i = 0; i < arguments.Length; i++)
-			{
-				if (parameters[i] == arguments[i])
-				{
-                    continue;
-				}
-				if (ReflectionUtility.IsIsAssignableFrom(parameters[i], arguments[i]))
-				{
-					continue;
-                }
-				flag = false;
-			}
-			return flag;
-		}
-	}
+    }
 }
