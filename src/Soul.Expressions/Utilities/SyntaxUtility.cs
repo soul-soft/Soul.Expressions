@@ -276,7 +276,7 @@ namespace Soul.Expressions.Utilities
         /// <param name="token"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public static ExpressionType ParseBinaryToken(string token)
+        public static ExpressionType GetExpressionType(string token)
         {
             switch (token)
             {
@@ -323,11 +323,11 @@ namespace Soul.Expressions.Utilities
             {
                 if (ReflectionUtility.IsAssignableFrom(expression1.Type, expression2.Type))
                 {
-                    expression1 = Expression.Convert(expression2, expression1.Type);
+                    expression1 = Expression.Convert(expression1, expression2.Type);
                 }
                 else
                 {
-                    expression2 = Expression.Convert(expression1, expression2.Type);
+                    expression2 = Expression.Convert(expression2, expression1.Type);
                 }
             }
         }

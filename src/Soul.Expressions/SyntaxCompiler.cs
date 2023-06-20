@@ -120,7 +120,7 @@ namespace Soul.Expressions
                 var expr3 = binaryMatch.Groups["expr3"].Value;
                 var left = Watch(expr1, context);
                 var right = Watch(expr3, context);
-                var binaryType = SyntaxUtility.ParseBinaryToken(expr2);
+                var binaryType = SyntaxUtility.GetExpressionType(expr2);
                 SyntaxUtility.ConvertBinaryExpression(ref left, ref right);
                 var key = context.AddToken(token, Expression.MakeBinary(binaryType, left, right));
                 var value = binaryMatch.Value;

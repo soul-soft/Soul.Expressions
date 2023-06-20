@@ -1,7 +1,9 @@
-using Soul.Expressions.Utilities;
-
 namespace Soul.Expressions.Test
 {
+    public class P
+    {
+        public string Name { get; set; }
+    }
     [TestClass]
     public class UnitTest1
     {
@@ -10,10 +12,10 @@ namespace Soul.Expressions.Test
         {
             var options = new SyntaxOptions();
             options.RegisterFunction(typeof(Functions));
-            var expr = "Pow(1.0, 2)";
+            var expr = "p.Name == null";
             var compiler = new SyntaxCompiler(options);
-            var labmda = compiler.Lambda(expr);
-            var result = labmda.Compile().DynamicInvoke();
+            var labmda = compiler.Lambda(expr, new Parameter("p", typeof(P)));
+            var result = labmda.Compile().DynamicInvoke(new P { });
             Assert.AreEqual(result, 2.2);
         }
     }
