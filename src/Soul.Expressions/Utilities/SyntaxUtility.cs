@@ -276,7 +276,7 @@ namespace Soul.Expressions.Utilities
 		/// <param name="token"></param>
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
-		public static ExpressionType GetExpressionType(string token)
+		public static ExpressionType GetBinaryType(string token)
 		{
 			switch (token)
 			{

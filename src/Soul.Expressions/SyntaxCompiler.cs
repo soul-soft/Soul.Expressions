@@ -119,7 +119,7 @@ namespace Soul.Expressions
                 var expr3 = binaryMatch.Groups["expr3"].Value;
                 var left = Watch(expr1, context);
                 var right = Watch(expr3, context);
-                var type = SyntaxUtility.GetExpressionType(expr2);
+                var binaryType = SyntaxUtility.GetBinaryType(expr2);
                 if (left.Type != right.Type)
                 {
                     if (ReflectionUtility.IsAssignableFrom(left.Type, right.Type))
@@ -131,7 +131,7 @@ namespace Soul.Expressions
                         left = Expression.Convert(left, right.Type);
                     }
                 }
-                var key = context.AddToken(token, Expression.MakeBinary(type, left, right));
+                var key = context.AddToken(token, Expression.MakeBinary(binaryType, left, right));
                 var value = binaryMatch.Value;
                 var newToken = token.Replace(value, key);
                 return Watch(newToken, context);
