@@ -7,8 +7,7 @@
 ``` C#
 
 var compiler = new SyntaxCompiler();
-compiler.Lambda("a > 20 && 1+2 < 4", new Parameter("a", typeof(int)));
-var labmda = compiler.Lambda(context);
+var labmda = compiler.Lambda("a > 20 && 1+2 < 4", new Parameter("a", typeof(int)));
 var result = labmda.Compile().DynamicInvoke(2);
 
 ```
