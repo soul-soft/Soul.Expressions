@@ -58,13 +58,14 @@ namespace Soul.Expressions
             {
                 var tokens = _tokens.Select(s => new
                 {
+                    s.Key,
                     s.Value.Token,
                     s.Value.ExpressionType
                 });
 
                 var width = tokens.Max(s => s.Token.Length);
 
-                return tokens.Select(s => $"{s.Token.PadRight(width)} | {s.ExpressionType}").Aggregate((x, y) => $"{x}\r\n{y}");
+                return tokens.Select(s => $"{s.Key} = {s.Token.PadRight(width)} | {s.ExpressionType}").Aggregate((x, y) => $"{x}\r\n{y}");
             }
         }
     }

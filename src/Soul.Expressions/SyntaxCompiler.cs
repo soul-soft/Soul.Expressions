@@ -64,8 +64,8 @@ namespace Soul.Expressions
                 var ownerExpression = Watch(owner, context);
                 var member = ownerExpression.Type.GetProperty(memberName)
                     ?? throw new MemberAccessException(token);
-                var key = context.AddToken(token, Expression.MakeMemberAccess(ownerExpression, member));
                 var value = memberAccessMatch.Value;
+                var key = context.AddToken(value, Expression.MakeMemberAccess(ownerExpression, member));
                 var newToken = token.Replace(value, key);
                 return Watch(newToken, context);
             }
@@ -98,7 +98,7 @@ namespace Soul.Expressions
                 var value = includeMatch.Value;
                 var expr = includeMatch.Groups["expr"].Value;
                 var expression = Watch(expr, context);
-                var key = context.AddToken(token, expression);
+                var key = context.AddToken(value, expression);
                 var newToken = token.Replace(value, key);
                 return Watch(newToken, context);
             }
@@ -107,8 +107,8 @@ namespace Soul.Expressions
             {
                 var expr = unaryMatch.Groups["expr"].Value;
                 var operand = Watch(expr, context);
-                var key = context.AddToken(token, Expression.MakeUnary(ExpressionType.Not, operand, null));
                 var value = unaryMatch.Value;
+                var key = context.AddToken(value, Expression.MakeUnary(ExpressionType.Not, operand, null));
                 var newToken = token.Replace(value, key);
                 return Watch(newToken, context);
             }
@@ -122,8 +122,8 @@ namespace Soul.Expressions
                 var right = Watch(expr3, context);
                 var binaryType = SyntaxUtility.GetExpressionType(expr2);
                 SyntaxUtility.ConvertBinaryExpression(ref left, ref right);
-                var key = context.AddToken(token, Expression.MakeBinary(binaryType, left, right));
                 var value = binaryMatch.Value;
+                var key = context.AddToken(value, Expression.MakeBinary(binaryType, left, right));
                 var newToken = token.Replace(value, key);
                 return Watch(newToken, context);
             }
