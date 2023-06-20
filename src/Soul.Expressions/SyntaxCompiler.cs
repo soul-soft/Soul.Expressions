@@ -87,9 +87,10 @@ namespace Soul.Expressions
                 var method = ReflectionUtility.FindMethod(functions, arguments)
                     ?? throw new MissingMethodException(token);
 
-                var key = context.AddToken(token, Expression.Call(null, method, arguments));
-                var newExpr = token.Replace(value, key);
-                return Watch(newExpr, context);
+                var parameters = SyntaxUtility.ConvertArgumentExpressions(method, arguments);
+                var key = context.AddToken(token, Expression.Call(null, method, parameters));
+                var newToken = token.Replace(value, key);
+                return Watch(newToken, context);
             }
             //处理括号
             if (SyntaxUtility.TryIncludeToken(token, out Match includeMatch))
@@ -119,18 +120,8 @@ namespace Soul.Expressions
                 var expr3 = binaryMatch.Groups["expr3"].Value;
                 var left = Watch(expr1, context);
                 var right = Watch(expr3, context);
-                var binaryType = SyntaxUtility.GetBinaryType(expr2);
-                if (left.Type != right.Type)
-                {
-                    if (ReflectionUtility.IsAssignableFrom(left.Type, right.Type))
-                    {
-                        right = Expression.Convert(right, left.Type);
-                    }
-                    else
-                    {
-                        left = Expression.Convert(left, right.Type);
-                    }
-                }
+                var binaryType = SyntaxUtility.ParseBinaryToken(expr2);
+                SyntaxUtility.ConvertBinaryExpression(ref left, ref right);
                 var key = context.AddToken(token, Expression.MakeBinary(binaryType, left, right));
                 var value = binaryMatch.Value;
                 var newToken = token.Replace(value, key);
