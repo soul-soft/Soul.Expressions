@@ -315,32 +315,12 @@ namespace Soul.Expressions.Utilities
 		}
 
 		/// <summary>
-		/// 类型自动转换
-		/// </summary>
-		/// <param name="expression1"></param>
-		/// <param name="expression2"></param>
-		public static void ConvertBinaryExpression(ref Expression expression1, ref Expression expression2)
-		{
-			if (expression1.Type != expression2.Type)
-			{
-				if (ReflectionUtility.IsAssignableFrom(expression1.Type, expression2.Type))
-				{
-					expression1 = Expression.Convert(expression1, expression2.Type);
-				}
-				else
-				{
-					expression2 = Expression.Convert(expression2, expression1.Type);
-				}
-			}
-		}
-
-		/// <summary>
 		/// 参数类型转换
 		/// </summary>
 		/// <param name="expression"></param>
 		/// <param name="type"></param>
 		/// <returns></returns>
-		public static IEnumerable<Expression> ConvertArgumentExpressions(MethodInfo method, IEnumerable<Expression> expressions)
+		public static IEnumerable<Expression> ConvertExpressionType(MethodInfo method, IEnumerable<Expression> expressions)
 		{
 			var arguments = expressions.ToArray();
 			var parameters = method.GetParameters().Select(s => s.ParameterType).ToArray();

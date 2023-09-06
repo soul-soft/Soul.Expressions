@@ -8,25 +8,19 @@ namespace Soul.Expressions.Utilities
 {
     public static class ReflectionUtility
     {
-        /// <summary>
-        /// 判断type2类型的指针是否可以指向type1的实列
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="instanceType"></param>
-        /// <returns></returns>
-        public static bool IsAssignableFrom(Type type, Type instanceType)
+        public static bool IsAssignableFrom(Type referenceType, Type instanceType)
         {
-            if (type == instanceType)
+            if (referenceType == instanceType)
             {
                 return true;
             }
-            else if (type.IsValueType && IsValueType(type))
+            else if (referenceType.IsValueType && IsValueType(referenceType))
             {
-                var code1 = GetValueTypeCode(type);
-                var code2 = GetValueTypeCode(instanceType);
-                return code1 > code2;
+                var referenceTypeCode = GetTypeCode(referenceType);
+                var instanceTypeCode = GetTypeCode(instanceType);
+                return referenceTypeCode > instanceTypeCode;
             }
-            return type.IsAssignableFrom(instanceType);
+            return referenceType.IsAssignableFrom(instanceType);
         }
 
         public static bool IsValueType(Type type)
@@ -45,43 +39,81 @@ namespace Soul.Expressions.Utilities
             return numabers.Contains(underType);
         }
 
-        public static int GetValueTypeCode(Type type)
+        public static int GetTypeCode(Type type)
         {
-            var underType = GetUnderlyingType(type);
-            if (underType == typeof(byte))
+            var underlyingType = GetUnderlyingType(type);
+            if (underlyingType == typeof(byte))
             {
                 return 0;
             }
-            if (underType == typeof(short))
+            if (underlyingType == typeof(short))
             {
                 return 1;
             }
-            if (underType == typeof(int))
+            if (underlyingType == typeof(int))
             {
                 return 2;
             }
-            if (underType == typeof(long))
+            if (underlyingType == typeof(long))
             {
                 return 3;
             }
-            if (underType == typeof(float))
+            if (underlyingType == typeof(float))
             {
                 return 4;
             }
-            if (underType == typeof(double))
+            if (underlyingType == typeof(double))
             {
                 return 5;
             }
-            if (underType == typeof(double))
+            if (underlyingType == typeof(double))
             {
                 return 6;
             }
-            return -1;
+            return int.MaxValue;
         }
 
         public static Type GetUnderlyingType(Type type)
         {
             return Nullable.GetUnderlyingType(type) ?? type;
+        }
+
+        public static bool IsNullableType(Type type)
+        {
+            return Nullable.GetUnderlyingType(type) != null;
+        }
+
+        public static Type GetBinaryExpressionType(Type type1, Type type2)
+        {
+            Type resultType = GetUnderlyingType(type1);
+            if (GetTypeCode(type1) < GetTypeCode(type2))
+            {
+                resultType = GetUnderlyingType(type2);
+            }
+            var integers = new Type[]
+            {
+                typeof(byte),
+                typeof(short),
+                typeof(sbyte),
+                typeof(ushort)
+            };
+            var floats = new Type[]
+            {
+                typeof(float),
+            };
+            if (integers.Contains(resultType))
+            {
+                resultType = typeof(int);
+            }
+            if (floats.Contains(resultType))
+            {
+                resultType = typeof(double);
+            }
+            if (resultType.IsValueType && (IsNullableType(type1) || IsNullableType(type2)))
+            {
+                return typeof(Nullable<>).MakeGenericType(resultType);
+            }
+            return resultType;
         }
 
         public static MethodInfo FindMethod(IEnumerable<MethodInfo> methods, IEnumerable<Expression> expressions)

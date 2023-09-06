@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 namespace Soul.Expressions.Test
 {
     public class P
@@ -10,12 +12,11 @@ namespace Soul.Expressions.Test
         [TestMethod("测试自动类型转换")]
         public void AutoTypeCast()
         {
-            var options = new SyntaxOptions();
-            var expr = "1 + 0.9";
-            var compiler = new SyntaxCompiler(options);
-            var context = new SyntaxContext(expr, new Parameter("a", typeof(int)));
-            var labmda = compiler.Lambda(context);
-            Console.WriteLine(context.DebugView);
+            var compiler = new SyntaxCompiler();
+            //编译
+            var labmda = compiler.Lambda("2.0 + a",new Parameter("a", typeof(int?)));
+            var func = labmda.Compile() as Func<int?, double?>;
+            Console.WriteLine(func(2));
         }
     }
 }

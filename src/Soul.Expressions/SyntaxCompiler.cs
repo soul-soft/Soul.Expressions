@@ -32,9 +32,18 @@ namespace Soul.Expressions
             return Lambda(new SyntaxContext(expression, parameters));
         }
 
+        public LambdaExpression Lambda(string expression, Type resultType, params Parameter[] parameters)
+        {
+            return Lambda(new SyntaxContext(expression, resultType, parameters));
+        }
+
         public LambdaExpression Lambda(SyntaxContext context)
         {
             var body = Watch(context.Expression, context);
+            if (context.ResultType != null && body.Type != context.ResultType)
+            {
+                body = Expression.Convert(body, context.ResultType);
+            }
             return Expression.Lambda(body, context.Parameters);
         }
 
@@ -82,12 +91,10 @@ namespace Soul.Expressions
                     var argument = Watch(item, context);
                     arguments.Add(argument);
                 }
-
                 var functions = Options.Functions.Where(a => a.Name == name);
-                var method = ReflectionUtility.FindMethod(functions, arguments)
-                    ?? throw new MissingMethodException(token);
+                var method = ReflectionUtility.FindMethod(functions, arguments) ?? throw new MissingMethodException(token);
 
-                var parameters = SyntaxUtility.ConvertArgumentExpressions(method, arguments);
+                var parameters = SyntaxUtility.ConvertExpressionType(method, arguments);
                 var key = context.AddToken(token, Expression.Call(null, method, parameters));
                 var newToken = token.Replace(value, key);
                 return Watch(newToken, context);
@@ -120,9 +127,17 @@ namespace Soul.Expressions
                 var expr3 = binaryMatch.Groups["expr3"].Value;
                 var left = Watch(expr1, context);
                 var right = Watch(expr3, context);
-                var binaryType = SyntaxUtility.GetExpressionType(expr2);
-                SyntaxUtility.ConvertBinaryExpression(ref left, ref right);
+                var resultType = ReflectionUtility.GetBinaryExpressionType(left.Type, right.Type);
+                if (left.Type != resultType)
+                {
+                    left = Expression.Convert(left, resultType);
+                }
+                if (right.Type != resultType)
+                {
+                    right = Expression.Convert(right, resultType);
+                }
                 var value = binaryMatch.Value;
+                var binaryType = SyntaxUtility.GetExpressionType(expr2);
                 var key = context.AddToken(value, Expression.MakeBinary(binaryType, left, right));
                 var newToken = token.Replace(value, key);
                 return Watch(newToken, context);
@@ -130,6 +145,5 @@ namespace Soul.Expressions
             var message = string.Format("Unrecognized syntax token：“{0}”", token);
             throw new NotImplementedException(message);
         }
-
     }
 }

@@ -13,6 +13,8 @@ namespace Soul.Expressions
 
         private readonly List<ParameterExpression> _parameters = new List<ParameterExpression>();
 
+        public Type ResultType { get; }
+
         public IEnumerable<ParameterExpression> Parameters => _parameters;
 
         public SyntaxContext(string expression)
@@ -20,21 +22,38 @@ namespace Soul.Expressions
             Expression = expression;
         }
 
-        public SyntaxContext(string expression, params Parameter[] parameters)
-            : this(expression)
+        public SyntaxContext(string expression, Type resultType)
         {
+            Expression = expression;
+            ResultType = resultType;
+        }
+
+        public SyntaxContext(string expression, params Parameter[] parameters)
+        {
+            Expression = expression;
             foreach (var item in parameters)
             {
                 AddParameter(item.Name, item.Type);
             }
         }
 
+        public SyntaxContext(string expression, Type resultType, params Parameter[] parameters)
+        {
+            Expression = expression;
+            ResultType = resultType;
+            foreach (var item in parameters)
+            {
+                AddParameter(item.Name, item.Type);
+            }
+        }
+
+
         public void AddParameter(string name, Type type)
         {
             _parameters.Add(System.Linq.Expressions.Expression.Parameter(type, name));
         }
 
-        public bool TryGetParameter(string token, out ParameterExpression parameterExpression)
+        internal bool TryGetParameter(string token, out ParameterExpression parameterExpression)
         {
             parameterExpression = _parameters.Where(a => a.Name == token).FirstOrDefault();
             return parameterExpression != null;
