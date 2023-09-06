@@ -11,7 +11,7 @@ namespace Soul.Expressions.Test
         public void AutoTypeCast()
         {
             var options = new SyntaxOptions();
-            var expr = "a > 20 && 1+2 < 4";
+            var expr = "1 + 0.9";
             var compiler = new SyntaxCompiler(options);
             var context = new SyntaxContext(expr, new Parameter("a", typeof(int)));
             var labmda = compiler.Lambda(context);
