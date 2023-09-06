@@ -14,8 +14,9 @@ namespace Soul.Expressions.Test
         {
             var compiler = new SyntaxCompiler();
             //Брвы
-            var labmda = compiler.Lambda("2.0 + a",new Parameter("a", typeof(int?)));
+            var labmda = compiler.Lambda("2.0 + a", typeof(double?), new Parameter("a", typeof(int?)));
             var func = labmda.Compile() as Func<int?, double?>;
+            var result = func(2);
             Console.WriteLine(func(2));
         }
     }
